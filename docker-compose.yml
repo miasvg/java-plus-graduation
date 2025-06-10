@@ -15,7 +15,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
 
-  main-service:
+  ewm-service:
     build: ./main-service
     ports:
       - "8080:8080"
