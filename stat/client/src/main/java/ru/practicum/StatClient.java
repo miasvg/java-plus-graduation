@@ -26,6 +26,7 @@ public class StatClient {
     }
 
     public void sendHit(RequestHitDto hit) {
+        log.info("Вызов записи хита в клиенте");
         try {
             client.post()
                     .uri("/hit")
@@ -38,6 +39,7 @@ public class StatClient {
     }
 
     public List<ResponseDto> getStats(String start, String end, List<String> uris, boolean unique) {
+        log.info("Вызов получения статистики в клиенте");
         try {
             client.get()
                     .uri(uriBuilder -> uriBuilder.path("/stats")
