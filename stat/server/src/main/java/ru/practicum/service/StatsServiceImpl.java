@@ -20,8 +20,8 @@ public class StatsServiceImpl implements StatsService {
     private final HitRepository repository;
     private final HitMapper mapper;
 
-    @Transactional
     @Override
+    @Transactional(readOnly = true)
     public List<ResponseDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         List<StatEntity> stats;
 

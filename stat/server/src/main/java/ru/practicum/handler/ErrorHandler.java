@@ -16,7 +16,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleException(final Exception e) {
-        log.info("500 {}", e.getMessage());
+        log.info(e.getMessage());
         return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Database error",
                 e.getMessage(),
