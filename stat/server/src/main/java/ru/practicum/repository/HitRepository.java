@@ -15,7 +15,7 @@ import java.util.List;
 public interface HitRepository extends JpaRepository<HitEntity, Long> {
 
     // Статистика по всем
-    @Query("SELECT new model.StatEntity(e.app, e.uri, COUNT(e)) " +
+    @Query("SELECT new ru.practicum.model.StatEntity(e.app, e.uri, COUNT(e)) " +
             "FROM HitEntity e " +
             "WHERE e.timestamp BETWEEN :start AND :end " +
             "GROUP BY e.app, e.uri " +
@@ -23,7 +23,7 @@ public interface HitRepository extends JpaRepository<HitEntity, Long> {
     List<StatEntity> getAllStats(@Param("start") LocalDateTime start,
                                  @Param("end") LocalDateTime end);
 
-    @Query("SELECT new model.StatEntity(e.app, e.uri, COUNT(DISTINCT e.ip)) " +
+    @Query("SELECT new ru.practicum.model.StatEntity(e.app, e.uri, COUNT(DISTINCT e.ip)) " +
             "FROM HitEntity e " +
             "WHERE e.timestamp BETWEEN :start AND :end " +
             "GROUP BY e.app, e.uri " +
@@ -32,7 +32,7 @@ public interface HitRepository extends JpaRepository<HitEntity, Long> {
                                     @Param("end") LocalDateTime end);
 
     // Статистика по конкретным URI
-    @Query("SELECT new model.StatEntity(e.app, e.uri, COUNT(e)) " +
+    @Query("SELECT new ru.practicum.model.StatEntity(e.app, e.uri, COUNT(e)) " +
             "FROM HitEntity e " +
             "WHERE e.timestamp BETWEEN :start AND :end AND e.uri IN :uris " +
             "GROUP BY e.app, e.uri " +
@@ -41,7 +41,7 @@ public interface HitRepository extends JpaRepository<HitEntity, Long> {
                                        @Param("end") LocalDateTime end,
                                        @Param("uris") List<String> uris);
 
-    @Query("SELECT new model.StatEntity(e.app, e.uri, COUNT(DISTINCT e.ip)) " +
+    @Query("SELECT new ru.practicum.model.StatEntity(e.app, e.uri, COUNT(DISTINCT e.ip)) " +
             "FROM HitEntity e " +
             "WHERE e.timestamp BETWEEN :start AND :end AND e.uri IN :uris " +
             "GROUP BY e.app, e.uri " +
