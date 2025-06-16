@@ -1,6 +1,6 @@
-package service;
+package ru.practicum.user.service;
 
-import model.UserDto.UserDto;
+import ru.practicum.user.model.UserDto.UserDto;
 
 import java.util.List;
 

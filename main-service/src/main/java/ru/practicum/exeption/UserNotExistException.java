@@ -1,4 +1,4 @@
-package exeption;
+package ru.practicum.exeption;
 
 public class UserNotExistException extends RuntimeException {
     public UserNotExistException(Long userId) {

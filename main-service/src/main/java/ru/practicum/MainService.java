@@ -1,9 +1,11 @@
+package ru.practicum;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan(basePackages = {
-        "com.example.mainservice",
+        "ru.practicum.mainservice",
         "ru.practicum.statserver"
 })
 @SpringBootApplication

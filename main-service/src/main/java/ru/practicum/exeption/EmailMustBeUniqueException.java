@@ -1,4 +1,4 @@
-package exeption;
+package ru.practicum.exeption;
 
 public class EmailMustBeUniqueException extends RuntimeException {
     public EmailMustBeUniqueException(String email) {

@@ -1,7 +1,7 @@
-package mappers;
+package ru.practicum.user.mappers;
 
-import model.User;
-import model.UserDto.UserDto;
+import ru.practicum.user.model.User;
+import ru.practicum.user.model.UserDto.UserDto;
 
 public class UserMapper {
     public static User mapToUser(UserDto userDto){

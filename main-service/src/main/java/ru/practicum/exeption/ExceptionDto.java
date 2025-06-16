@@ -1,4 +1,4 @@
-package model;
+package ru.practicum.exeption;
 
 import lombok.*;
 

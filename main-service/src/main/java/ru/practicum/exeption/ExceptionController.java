@@ -1,8 +1,5 @@
-package controller;
+package ru.practicum.exeption;
 
-import exeption.EmailMustBeUniqueException;
-import exeption.UserNotExistException;
-import model.ExceptionDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

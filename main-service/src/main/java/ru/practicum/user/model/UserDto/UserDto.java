@@ -1,4 +1,4 @@
-package model.UserDto;
+package ru.practicum.user.model.UserDto;
 
 
 import jakarta.validation.constraints.Email;

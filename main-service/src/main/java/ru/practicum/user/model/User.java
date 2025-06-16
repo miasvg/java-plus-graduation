@@ -1,7 +1,8 @@
-package model;
+package ru.practicum.user.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.Objects;
 
@@ -11,15 +12,18 @@ import java.util.Objects;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
+
     @Column(name = "email", nullable = false, unique = true)
-    private String email;
+    String email;
+
     @Column(name = "name", nullable = false)
-    private String name;
+    String name;
 
     @Override
     public boolean equals(Object o) {
