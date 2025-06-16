@@ -44,3 +44,9 @@ CREATE TABLE IF NOT EXISTS requests (
     requester_id BIGINT REFERENCES users(id),
     status VARCHAR
 );
+
+CREATE TABLE IF NOT EXISTS compilation_event (
+    compilation_id BIGINT REFERENCES compilations(id) ON DELETE CASCADE,
+    event_id BIGINT REFERENCES events(id) ON DELETE CASCADE,
+    PRIMARY KEY (compilation_id, event_id)
+);
