@@ -1,4 +1,4 @@
-package ru.practicum.user.model.UserDto;
+package ru.practicum.category.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class UserShortDto {
-    Long id;
-    String name;
+public class CategoryDto {
+    private Long id;
+    private String name;
 }
