@@ -1,6 +1,7 @@
 package ru.practicum.compilation.controller;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class CompilationController {
     }
 
     @GetMapping("/{compId}")
-    public CompilationDto getCompilationById(@PathVariable Long compId) {
+    public CompilationDto getCompilationById(@PathVariable @Positive Long compId) {
         log.info("Получение подборки событий по ID: {}", compId);
         return compilationService.getById(compId);
     }
