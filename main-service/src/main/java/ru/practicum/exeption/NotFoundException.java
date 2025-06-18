@@ -6,6 +6,6 @@ public class NotFoundException extends RuntimeException {
     }
 
     public NotFoundException(String entityName, Long id) {
-        super(String.format("%s с id %d не найдено", entityName, id));
+        super(String.format("%s с id %d не найден(а)", entityName, id));
     }
 }
