@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.dto.EventDtoPrivate;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventRequest;
+import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
@@ -41,5 +43,13 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.save(create);
         log.info("Создание меропрития {} завершено", event);
         return EventMapper.mapToDtoPrivate(event);
+    }
+
+    @Override
+    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие", eventId));
+
+        return null;
     }
 }
