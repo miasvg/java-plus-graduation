@@ -32,4 +32,15 @@ public class ExceptionController {
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
     }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler
+    public ExceptionDto handleNotFound(final NotFoundException e) {
+        return ExceptionDto.builder()
+                .status(HttpStatus.NOT_FOUND.toString())
+                .reason("resources not found")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
 }
