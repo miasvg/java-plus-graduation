@@ -1,0 +1,74 @@
+package ru.practicum.event.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.location.dto.NewLocationRequest;
+import ru.practicum.validator.ValidEventDate;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class NewEventRequest {
+    @NotBlank
+    @Size(min = 3, max = 120)
+    String title;
+
+    @NotBlank
+    @Size(min = 20, max = 2000)
+    String annotation;
+
+    @NotBlank
+    @Size(min = 20, max = 7000)
+    String description;
+
+    @NotNull
+    Long categoryId;
+
+    @NotNull
+    @ValidEventDate
+    LocalDateTime eventDate;
+
+    @NotNull
+    NewLocationRequest location;
+
+    @NotNull
+    Boolean paid;
+
+    @PositiveOrZero
+    Integer participantLimit;
+
+    @NotNull
+    Boolean requestModeration;
+
+    //метод проверки наличия поля, иначе ставим 0
+    public boolean hasParticipantLimit() {
+        return participantLimit != null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NewEventRequest that = (NewEventRequest) o;
+        return participantLimit == that.participantLimit && Objects.equals(title, that.title)
+                && Objects.equals(annotation, that.annotation) && Objects.equals(description, that.description)
+                && Objects.equals(categoryId, that.categoryId) && Objects.equals(eventDate, that.eventDate)
+                && Objects.equals(location, that.location) && Objects.equals(paid, that.paid)
+                && Objects.equals(requestModeration, that.requestModeration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, annotation, description, categoryId, eventDate, location, paid,
+                participantLimit, requestModeration);
+    }
+}
