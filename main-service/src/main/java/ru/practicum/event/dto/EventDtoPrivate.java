@@ -28,5 +28,5 @@ public class EventDtoPrivate {
     Boolean requestModeration;
     UserDto initiator;
     State state;
-
+    int views;
 }

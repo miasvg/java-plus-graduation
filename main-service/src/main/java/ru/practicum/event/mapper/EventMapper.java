@@ -25,6 +25,7 @@ public class EventMapper {
                 .requestModeration(request.getRequestModeration())
                 .initiator(user)
                 .state(State.PENDING)
+                .views(0)
                 .build();
         if (request.hasParticipantLimit()) {
             event.setParticipantLimit(request.getParticipantLimit());
@@ -47,6 +48,7 @@ public class EventMapper {
                 .participantLimit(event.getParticipantLimit())
                 .initiator(UserMapper.mapToUserDto(event.getInitiator()))
                 .state(event.getState())
+                .views(event.getViews())
                 .build();
     }
 }
