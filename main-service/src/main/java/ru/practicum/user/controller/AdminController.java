@@ -20,7 +20,7 @@ public class AdminController {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto createUser(@Validated UserDto userDto) {
+    public UserDto createUser(@Validated @RequestBody UserDto userDto) {
         log.info("Запрос на добавление пользователя с параметрами {}", userDto);
         return userService.createUser(userDto);
     }
