@@ -22,7 +22,7 @@ public class CompilationController {
     public List<CompilationDto> getAllCompilations(@RequestParam Boolean pinned,
                                                    @RequestParam(defaultValue = "0") @Min(0) int from,
                                                    @RequestParam(defaultValue = "10") @Min(1) int size
-                                                   ) {
+    ) {
         log.info("Получение подборки событий");
         CompilationRequestDto requestDto = CompilationRequestDto.builder()
                 .pinned(pinned)
