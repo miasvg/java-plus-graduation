@@ -12,7 +12,6 @@ import java.util.Objects;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LocationDto {
-    Long id;
     Float lan;
     Float lon;
 
@@ -21,11 +20,11 @@ public class LocationDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocationDto that = (LocationDto) o;
-        return Objects.equals(id, that.id) && Objects.equals(lan, that.lan) && Objects.equals(lon, that.lon);
+        return Objects.equals(lan, that.lan) && Objects.equals(lon, that.lon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lan, lon);
+        return Objects.hash(lan, lon);
     }
 }

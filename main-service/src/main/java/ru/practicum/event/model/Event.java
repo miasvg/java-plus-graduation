@@ -17,7 +17,11 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "events")
+@Table(name = "events", indexes = {
+        //вроде как так поиск по текстовому запросу должен быстрее работать, но я не уверена, что правильно это применила
+        @Index(name = "idx_event_annotation", columnList = "annotation"),
+        @Index(name = "idx_event_description", columnList = "description")
+})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +31,7 @@ public class Event {
     String title;
 
     //краткая аннотация
-    @Column(name = "annotation", nullable = false)
+    @Column(name = "annotation")
     String annotation;
 
     //полное описание

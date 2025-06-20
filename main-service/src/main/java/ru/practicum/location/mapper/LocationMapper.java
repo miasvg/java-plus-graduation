@@ -7,7 +7,6 @@ import ru.practicum.location.model.Location;
 public class LocationMapper {
     public static LocationDto mapToDto(Location location) {
         return LocationDto.builder()
-                .id(location.getId())
                 .lon(location.getLon())
                 .lan(location.getLan())
                 .build();
