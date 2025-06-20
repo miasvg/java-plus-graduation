@@ -14,7 +14,7 @@ import ru.practicum.user.model.User;
 
 public class EventMapper {
     public static Event mapToEventNew(NewEventRequest request, Category category,
-                                         Location location, User user) {
+                                      Location location, User user) {
         Event event = Event.builder()
                 .title(request.getTitle())
                 .annotation(request.getAnnotation())
@@ -53,6 +53,17 @@ public class EventMapper {
                 .build();
     }
 
+    public static EventShortDto mapToShortDto(Event event) {
+        return EventShortDto.builder()
+                .annotation(event.getAnnotation())
+                .category(CategoryMapper.mapToDto(event.getCategory()))
+                .eventDate(event.getEventDate())
+                .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
+                .paid(event.getPaid())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .build();
+    }
     public static EventShortDto mapToShortDto(Event event) {
         return EventShortDto.builder()
                 .annotation(event.getAnnotation())

@@ -12,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.user.repository.UserRepository;
 import ru.practicum.user.service.UserService;
-import org.springframework.data.domain.Pageable;
 
 
 import java.util.List;
@@ -43,7 +42,7 @@ public class UserServiceImpl implements UserService {
         } else {
             Page<User> page = userRepository.findByIdAfter(
                     from,
-                    (Pageable) PageRequest.of(0, size.intValue(), Sort.by("id"))
+                    PageRequest.of(0, size.intValue(), Sort.by("id"))
             );
             users = page.getContent();
         }

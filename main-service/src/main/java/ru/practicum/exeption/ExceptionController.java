@@ -11,9 +11,10 @@ import java.time.format.DateTimeFormatter;
 @RestControllerAdvice
 public class ExceptionController {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto emailMustBeUniqueExceptionHandler(EmailMustBeUniqueException e){
+    public ExceptionDto emailMustBeUniqueExceptionHandler(EmailMustBeUniqueException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .reason("email not unique")
@@ -24,7 +25,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto userNotExistExceptionHandler(UserNotExistException e){
+    public ExceptionDto userNotExistExceptionHandler(UserNotExistException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.NOT_FOUND.toString())
                 .reason("user not found")
