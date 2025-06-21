@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface EventRequestRepository extends JpaRepository<EventRequest, Long> {
-    List<EventRequest>
+    List<EventRequest> findAllByRequester_Id(Long requesterId);
 }
