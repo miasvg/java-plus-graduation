@@ -10,6 +10,7 @@ import ru.practicum.event.model.Status;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.EventRequestRepository;
 import ru.practicum.exeption.NotFoundException;
+import ru.practicum.exeption.NotValidUserException;
 import ru.practicum.exeption.UserNotExistException;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -21,7 +22,7 @@ import static ru.practicum.event.mapper.EventRequestMapper.mapToEventRequestDto;
 
 @Service
 @RequiredArgsConstructor
-public class EventRequestServiceImpl implements EventRequestService{
+public class EventRequestServiceImpl implements EventRequestService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final EventRequestRepository eventRequestRepository;
@@ -29,7 +30,7 @@ public class EventRequestServiceImpl implements EventRequestService{
     @Override
     public List<EventRequestDto> getUsersRequests(Long userId) {
 
-        if (!userRepository.existsById(userId)){
+        if (!userRepository.existsById(userId)) {
             throw new UserNotExistException(userId);
         }
 
@@ -54,6 +55,9 @@ public class EventRequestServiceImpl implements EventRequestService{
     public EventRequestDto cancelRequest(Long userId, Long requestId) {
         EventRequest eventRequest = eventRequestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("EventRequest", requestId));
-        return null;
+        if (!eventRequest.getId().equals(requestId)) {
+            throw new NotValidUserException(userId);
+        }
+        return mapToEventRequestDto(eventRequest);
     }
 }

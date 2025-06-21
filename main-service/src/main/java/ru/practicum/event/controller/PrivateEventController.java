@@ -1,7 +1,6 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,7 @@ public class PrivateEventController {
     }
 
     @GetMapping("/{userId}/request")
-    public List<EventRequestDto> getUsersEventList(@PathVariable Long userId){
+    public List<EventRequestDto> getUsersEventList(@PathVariable Long userId) {
         log.info("Получение запросов на учатие в событии пользователя с id {}", userId);
         return eventRequestService.getUsersRequests(userId);
     }
@@ -39,14 +38,14 @@ public class PrivateEventController {
     @PostMapping("/{userId}/request")
     @ResponseStatus(HttpStatus.CREATED)
     public EventRequestDto createUserRequestToEvent(@PathVariable Long userId,
-                                                    @RequestParam Long eventId){
+                                                    @RequestParam Long eventId) {
         log.info("Создание запроса на участие события с id: {} пользователем id: {}", eventId, userId);
         return eventRequestService.createRequest(userId, eventId);
     }
 
     @PatchMapping("/{userId}/request/{requestId}/cancel")
     public EventRequestDto cancelUserRequestToEvent(@PathVariable Long userId,
-                                                    @PathVariable Long requestId){
+                                                    @PathVariable Long requestId) {
         log.info("Отмена запроса с id: {} пользователемс id: {}", requestId, userId);
         return eventRequestService.cancelRequest(userId, requestId);
     }

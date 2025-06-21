@@ -34,6 +34,17 @@ public class ExceptionController {
                 .build();
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDto notValidUserExceptionHandler(NotValidUserException e){
+        return ExceptionDto.builder()
+                .status(HttpStatus.FORBIDDEN.toString())
+                .reason("Только  владлец заявки может ее отменять")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler
     public ExceptionDto handleNotFound(final NotFoundException e) {
