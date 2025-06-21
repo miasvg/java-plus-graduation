@@ -56,7 +56,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Optional<EventDtoPrivate> getByIdPublic(Long eventId) {
         log.info("Начинаем поиск мероприятия id = {} со статусом Published", eventId);
-        Optional<Event> eventOp = eventRepository.findByIdAndStatePublished(eventId);
+        Optional<Event> eventOp = eventRepository.findByIdAndState(eventId, "PUBLISHED");
         if (eventOp.isPresent()) {
             Event event = eventOp.orElseThrow();
             updateViews(event);
@@ -83,7 +83,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getUsersEvents(Long userId, Pageable page) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
-        Page<Event> events = eventRepository.findByInitiator_idAndStatePublished(userId, page);
+        Page<Event> events = eventRepository.findByInitiatorIdAndState(userId, "PUBLISHED", page);
         log.info("Получаем все опубликованные мероприятия для пользователя id = {}", userId);
         return events.getContent().stream()
                 .map(EventMapper::mapToShortDto)
