@@ -58,6 +58,8 @@ public class EventRequestServiceImpl implements EventRequestService {
         if (!eventRequest.getId().equals(requestId)) {
             throw new NotValidUserException(userId);
         }
+
+        eventRequestRepository.delete(eventRequest);
         return mapToEventRequestDto(eventRequest);
     }
 }
