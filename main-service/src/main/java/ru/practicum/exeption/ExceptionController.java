@@ -1,6 +1,7 @@
 package ru.practicum.exeption;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -40,6 +41,26 @@ public class ExceptionController {
         return ExceptionDto.builder()
                 .status(HttpStatus.NOT_FOUND.toString())
                 .reason("resources not found")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionDto handlerValidEventDay(final MethodArgumentNotValidException e) {
+        return ExceptionDto.builder()
+                .status(HttpStatus.CONFLICT.toString())
+                .reason("for the requested operation the conditions are not met")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionDto handlerConflict(final ConflictException e) {
+        return ExceptionDto.builder()
+                .status(HttpStatus.CONFLICT.toString())
+                .reason("for the requested operation the conditions are not met.")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();

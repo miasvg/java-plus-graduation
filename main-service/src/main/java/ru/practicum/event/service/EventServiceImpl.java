@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.dto.EventDtoPrivate;
@@ -12,6 +13,7 @@ import ru.practicum.event.dto.NewEventRequest;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.State;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.location.mapper.LocationMapper;
@@ -45,11 +47,24 @@ public class EventServiceImpl implements EventService {
         return EventMapper.mapToDtoPrivate(event);
     }
 
+
+    //TODO
+    // изменить можно только отмененные события или события в состоянии ожидания модерации (Ожидается код ошибки 409)
+    // дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента (Ожидается код ошибки 409)
+
     @Override
     public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие", eventId));
-
+        if (!isEventUpdRequestValid(userId, event)) {
+            throw new MethodArgumentNotValidException();
+        }
         return null;
+    }
+
+    private boolean isEventUpdRequestValid(Long userId, Event event) {
+        return userRepository.existsById(userId) &&
+                event.getInitiator().getId().equals(userId) &&
+                !event.getState().equals(State.PUBLISHED);
     }
 }
