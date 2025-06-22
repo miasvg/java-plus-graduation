@@ -35,9 +35,9 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         byte[] buf = request.getContentAsByteArray();
         if (buf.length > 0) {
             String body = new String(buf, 0, buf.length, StandardCharsets.UTF_8);
-            log.warn("📦 Тело запроса (LOG из фильтра): {}", body);
+            log.warn("Тело запроса (LOG из фильтра): {}", body);
         } else {
-            log.warn("📭 Тело запроса отсутствует или пустое.");
+            log.warn("Тело запроса отсутствует или пустое.");
         }
     }
 }
