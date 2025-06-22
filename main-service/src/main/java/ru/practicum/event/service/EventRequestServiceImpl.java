@@ -9,6 +9,7 @@ import ru.practicum.event.model.EventRequest;
 import ru.practicum.event.model.Status;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.EventRequestRepository;
+import ru.practicum.exeption.EventNotFoundException;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.exeption.NotValidUserException;
 import ru.practicum.exeption.UserNotExistException;
@@ -41,7 +42,8 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     public EventRequestDto createRequest(Long userId, Long eventId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistException(userId));
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event", eventId));
+        Event event = eventRepository.findById(eventId).orElseThrow(() ->
+                new EventNotFoundException("Событие с id: " + eventId + "не существует."));
         EventRequest eventRequest = eventRequestRepository.save(EventRequest.builder()
                 .created(LocalDateTime.now())
                 .requester(user)

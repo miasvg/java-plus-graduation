@@ -23,19 +23,19 @@ public class PrivateEventController {
 
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDtoPrivate addEvent(@PathVariable("userId") long userId,
+    public EventDtoPrivate addEvent(@PathVariable Long userId,
                                     @RequestBody @Valid NewEventRequest request) {
         log.info("Сохранение мероприятия");
         return eventService.addEvent(userId, request);
     }
 
-    @GetMapping("/{userId}/request")
+    @GetMapping("/{userId}/requests")
     public List<EventRequestDto> getUsersEventList(@PathVariable Long userId) {
         log.info("Получение запросов на учатие в событии пользователя с id {}", userId);
         return eventRequestService.getUsersRequests(userId);
     }
 
-    @PostMapping("/{userId}/request")
+    @PostMapping("/{userId}/requests")
     @ResponseStatus(HttpStatus.CREATED)
     public EventRequestDto createUserRequestToEvent(@PathVariable Long userId,
                                                     @RequestParam Long eventId) {

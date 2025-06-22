@@ -1,5 +1,6 @@
 package ru.practicum.exeption;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionController {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -45,6 +47,17 @@ public class ExceptionController {
                 .build();
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto eventNotFoundExceptionHandler(EventNotFoundException e){
+        return ExceptionDto.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .reason("обытие не найдено")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler
     public ExceptionDto handleNotFound(final NotFoundException e) {
@@ -55,4 +68,6 @@ public class ExceptionController {
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
     }
+
+
 }
