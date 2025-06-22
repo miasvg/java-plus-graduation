@@ -15,6 +15,7 @@ import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.State;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.location.mapper.LocationMapper;
 import ru.practicum.location.model.Location;
@@ -57,7 +58,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие", eventId));
         if (!isEventUpdRequestValid(userId, event)) {
-            throw new MethodArgumentNotValidException();
+            throw new ConflictException("Данное событие нельзя обновлять");
         }
         return null;
     }
