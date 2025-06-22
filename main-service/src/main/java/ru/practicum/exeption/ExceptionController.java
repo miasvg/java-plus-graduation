@@ -1,5 +1,6 @@
 package ru.practicum.exeption;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -9,11 +10,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionController {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto emailMustBeUniqueExceptionHandler(EmailMustBeUniqueException e){
+    public ExceptionDto emailMustBeUniqueExceptionHandler(EmailMustBeUniqueException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .reason("email not unique")
@@ -24,10 +27,32 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDto userNotExistExceptionHandler(UserNotExistException e){
+    public ExceptionDto userNotExistExceptionHandler(UserNotExistException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.NOT_FOUND.toString())
                 .reason("user not found")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDto notValidUserExceptionHandler(NotValidUserException e){
+        return ExceptionDto.builder()
+                .status(HttpStatus.FORBIDDEN.toString())
+                .reason("Только  владлец заявки может ее отменять")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto eventNotFoundExceptionHandler(EventNotFoundException e){
+        return ExceptionDto.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .reason("обытие не найдено")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
@@ -43,4 +68,6 @@ public class ExceptionController {
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
     }
+
+
 }

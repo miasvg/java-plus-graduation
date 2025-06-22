@@ -13,7 +13,7 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE u.id > :from")
+    @Query("SELECT u FROM User u WHERE u.id >= :from")
     Page<User> findByIdAfter(Long from, Pageable pageable);
 
     List<User> findByIdIn(List<Long> ids);

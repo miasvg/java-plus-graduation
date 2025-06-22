@@ -1,8 +1,10 @@
 package ru.practicum.event.controller;
 
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +15,9 @@ import ru.practicum.StatClient;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.event.dto.EventDtoPrivate;
 import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.EventRequestDto;
 import ru.practicum.event.dto.NewEventRequest;
+import ru.practicum.event.service.EventRequestService;
 import ru.practicum.event.service.EventService;
 
 import java.time.LocalDateTime;
@@ -26,11 +30,12 @@ import java.util.List;
 public class PrivateEventController {
     private final EventService eventService;
     private final StatClient statClient;
+    private final EventRequestService eventRequestService;
 
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDtoPrivate addEvent(@PathVariable("userId") long userId,
-                                    @RequestBody NewEventRequest request) {
+    public EventDtoPrivate addEvent(@PathVariable Long userId,
+                                    @RequestBody @Valid NewEventRequest request) {
         log.info("Сохранение мероприятия");
         return eventService.addEvent(userId, request);
     }
@@ -56,5 +61,25 @@ public class PrivateEventController {
         log.info("Отправляем данные в сервис статистики {}", hitDto.toString());
         statClient.sendHit(hitDto);
         return eventService.getByIdPrivate(userId, eventId);
+
+    @GetMapping("/{userId}/requests")
+    public List<EventRequestDto> getUsersEventList(@PathVariable Long userId) {
+        log.info("Получение запросов на учатие в событии пользователя с id {}", userId);
+        return eventRequestService.getUsersRequests(userId);
+    }
+
+    @PostMapping("/{userId}/requests")
+    @ResponseStatus(HttpStatus.CREATED)
+    public EventRequestDto createUserRequestToEvent(@PathVariable Long userId,
+                                                    @RequestParam Long eventId) {
+        log.info("Создание запроса на участие события с id: {} пользователем id: {}", eventId, userId);
+        return eventRequestService.createRequest(userId, eventId);
+    }
+
+    @PatchMapping("/{userId}/request/{requestId}/cancel")
+    public EventRequestDto cancelUserRequestToEvent(@PathVariable Long userId,
+                                                    @PathVariable Long requestId) {
+        log.info("Отмена запроса с id: {} пользователемс id: {}", requestId, userId);
+        return eventRequestService.cancelRequest(userId, requestId);
     }
 }
