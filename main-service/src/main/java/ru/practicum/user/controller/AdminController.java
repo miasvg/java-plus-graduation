@@ -1,11 +1,11 @@
 package ru.practicum.user.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.user.model.UserDto.UserDto;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.user.service.UserService;
 
@@ -19,8 +19,8 @@ public class AdminController {
     private final UserService userService;
 
     @PostMapping("/users")
-    @ResponseStatus(HttpStatus.OK)
-    public UserDto createUser(@Validated @RequestBody UserDto userDto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
         log.info("Запрос на добавление пользователя с параметрами {}", userDto);
         return userService.createUser(userDto);
     }
@@ -37,9 +37,11 @@ public class AdminController {
 
 
     @DeleteMapping("users/{userId}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
     }
+
+
 
 }

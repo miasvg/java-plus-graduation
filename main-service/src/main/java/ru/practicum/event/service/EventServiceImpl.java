@@ -1,19 +1,20 @@
 package ru.practicum.event.service;
 
+import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
-import ru.practicum.event.dto.EventDtoPrivate;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.NewEventRequest;
-import ru.practicum.event.dto.UpdateEventUserRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.State;
+import ru.practicum.event.model.StateAction;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
@@ -22,6 +23,10 @@ import ru.practicum.location.model.Location;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -48,61 +53,218 @@ public class EventServiceImpl implements EventService {
         return EventMapper.mapToDtoPrivate(event);
     }
 
-
-    //TODO
-    // изменить можно только отмененные события или события в состоянии ожидания модерации (Ожидается код ошибки 409)
-    // дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента (Ожидается код ошибки 409)
-
     @Override
-    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequest request) {
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("Событие", eventId));
-        if (!isEventUpdRequestValid(userId, event)) {
+    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventRequest request) {
+        Event event = getEvent(eventId);
+        log.info("Валидация события (id {}) для обновления пользователем (id {})", event.getId(), userId);
+        if (!(userRepository.existsById(userId) &&
+                event.getInitiator().getId().equals(userId) &&
+                !event.getState().equals(State.PUBLISHED))) {
+            log.warn("Конфликт при запросе на обновление события");
             throw new ConflictException("Данное событие нельзя обновлять");
         }
         updateEventFields(event, request);
 
-        return EventMapper.mapToFullDto(event);
+        return EventMapper.mapToFullDto(eventRepository.save(event));
     }
 
-    private boolean isEventUpdRequestValid(Long userId, Event event) {
-        return userRepository.existsById(userId) &&
-                event.getInitiator().getId().equals(userId) &&
-                !event.getState().equals(State.PUBLISHED);
+    @Override
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventRequest request) {
+        Event event = getEvent(eventId);
+        log.info("Валидация события (id {}) для обновления", event.getId());
+        if (request.getStateAction().equals(StateAction.PUBLISH_EVENT.toString())
+                && !event.getState().equals(State.PENDING)) {
+            throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
+        }
+        if (request.getStateAction().equals(StateAction.CANCEL_REVIEW.toString())
+                && !event.getState().equals(State.PUBLISHED)){
+            throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано ");
+        }
+        updateEventFields(event, request);
+        return EventMapper.mapToFullDto(eventRepository.save(event));
     }
 
-    private void updateEventFields(Event event, UpdateEventUserRequest request) {
+    private Event getEvent(Long id) {
+        log.info("Поиск мероприятия (id {})", id);
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Событие", id));
+    }
+
+    private void updateEventFields(Event event, UpdateEventRequest request) {
         if (request.getAnnotation() != null) {
+            log.debug("Обновление краткого описания события");
             event.setAnnotation(request.getAnnotation());
         }
         if (request.getCategory() != null) {
             Long id = request.getCategory().longValue();
             event.setCategory(categoryRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("Категория", id)));
+            log.debug("Обновление категории события");
         }
         if (request.getDescription() != null) {
+            log.debug("Обновление полного описания");
             event.setDescription(request.getDescription());
         }
         if (request.getEventDate() != null) {
+            log.debug("Обновление даты и времени события");
             event.setEventDate(request.getEventDate());
         }
         if (request.getLocation() != null) {
+            log.debug("Обновление места проведения события");
             event.setLocation(LocationMapper.mapToLocationNew(request.getLocation()));
         }
         if (request.getPaid() != null) {
+            log.debug("Обновление поля необходимости оплаты события");
             event.setPaid(request.getPaid());
         }
         if (request.getParticipantLimit() != null) {
+            log.debug("Обновление лимита участников события");
             event.setParticipantLimit(request.getParticipantLimit());
         }
         if (request.getRequestModeration() != null) {
+            log.debug("Обновление статуса пре-модерации для события");
             event.setRequestModeration(request.getRequestModeration());
         }
         if (request.getStateAction() != null) {
-            event.setState(State.valueOf(request.getStateAction()));
+            log.debug("Обновление статуса события");
+            switch (request.getStateAction()){
+                case "SEND_TO_REVIEW":
+                    event.setState(State.PENDING);
+                    break;
+                case "PUBLISH_EVENT":
+                    event.setState(State.PUBLISHED);
+                    break;
+                default:
+                    event.setState(State.CANCELED);
+            }
         }
         if (request.getTitle() != null) {
+            log.debug("Обновление заголовка события");
             event.setTitle(request.getTitle());
         }
+    }
+
+    @Override
+    public Optional<EventDtoPrivate> getByIdPublic(Long eventId) {
+        log.info("Начинаем поиск мероприятия id = {} со статусом Published", eventId);
+        Optional<Event> eventOp = eventRepository.findByIdAndState(eventId, "PUBLISHED");
+        if (eventOp.isPresent()) {
+            Event event = eventOp.orElseThrow();
+            updateViews(event);
+            EventDtoPrivate eventDto = EventMapper.mapToDtoPrivate(event);
+            log.info("Мероприятие найдено: {}", eventDto);
+            return Optional.of(eventDto);
+        } else {
+            log.info("Мероприятие не найдено, возвращаем Optional.empty()");
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public EventDtoPrivate getByIdPrivate(Long userId, Long eventId) {
+        log.info("Получаем пользователя с id = {}", userId);
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
+        log.info("Начинаем получение мероприятия id = {}", eventId);
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event", eventId));
+        updateViews(event);
+        log.info("Мероприятие успешно получено: {}", event);
+        return EventMapper.mapToDtoPrivate(event);
+    }
+
+    @Override
+    public List<EventShortDto> getUsersEvents(Long userId, Pageable page) {
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
+        Page<Event> events = eventRepository.findByInitiatorIdAndState(userId, "PUBLISHED", page);
+        log.info("Получаем все опубликованные мероприятия для пользователя id = {}", userId);
+        return events.getContent().stream()
+                .map(EventMapper::mapToShortDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventShortDto> getEventsWithParamAdmin(EventSearchParam eventSearchParam, Pageable page) {
+        log.info("Начинаем получение событий с фильтрами для Admin API");
+        Specification<Event> spec = createSpecification(eventSearchParam);
+        Page<Event> events = eventRepository.findAll(spec, page);
+        log.info("Список отфильрованных мероприятий для Admin API получен: {}", events);
+        return events.getContent().stream()
+                .map(EventMapper::mapToShortDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventShortDto> getEventsWithParamPublic(EventSearchParam eventSearchParam, Pageable page) {
+        log.info("Начинаем получение событий с фильтрами для Public API");
+        Specification<Event> spec = createSpecification(eventSearchParam);
+        Page<Event> events = eventRepository.findAll(spec, page);
+        log.info("Список отфильрованных мероприятий для Public API получен: {}", events);
+        List<Long> eventIds = events.getContent().stream()
+                .map(Event::getId)
+                .toList();
+        log.info("Обновляем счетчик просмотров для списка id Event: {}", eventIds);
+        eventRepository.incrementViews(eventIds);
+        return events.getContent().stream()
+                .map(EventMapper::mapToShortDto)
+                .toList();
+    }
+
+    private void updateViews(Event event) {
+        event.setViews(event.getViews() + 1);
+        log.info("Обновляем счетчик просмотров для мероприятия id = {}", event.getId());
+        eventRepository.save(event);
+    }
+
+    private Specification<Event> createSpecification(final EventSearchParam searchParam) {
+        return (root, query, cb) -> {
+            log.info("Начинаем фильтрацию переданных параметров");
+            List<Predicate> predicates = new ArrayList<>();
+
+            log.info("Проводим фильтрацию по пользователям");
+            if (searchParam.getUsers() != null) {
+                predicates.add(root.get("initiator").get("id").in(searchParam.getUsers()));
+            }
+
+            log.info("Проводим фильтрацию по состояниям");
+            if (searchParam.getStates() != null) {
+                predicates.add(root.get("state").in(searchParam.getStates()));
+            }
+
+            log.info("Проводим фильтрацию по категориям");
+            if (searchParam.getCategories() != null) {
+                predicates.add(root.get("category").get("id").in(searchParam.getCategories()));
+            }
+
+            log.info("Проводим фильтрацию по времени начала");
+            if (searchParam.getRangeStart() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), searchParam.getRangeStart()));
+            }
+
+            log.info("Проводим фильтрацию по времени окончания");
+            if (searchParam.getRangeEnd() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("eventDate"), searchParam.getRangeEnd()));
+            }
+
+            log.info("Проводим текстовый поиск");
+            if (searchParam.getText() != null) {
+                String searchText = searchParam.getText().toLowerCase();
+
+                log.info("Создание предиката для поиска по текстовому запросу в аннотации");
+                Predicate annotationPredicate = cb.like(
+                        cb.lower(root.get("annotation")),
+                        "%" + searchText + "%"
+                );
+
+                log.info("Создание предиката для поиска по текстовому запросу в описании");
+                Predicate descriptionPredicate = cb.like(
+                        cb.lower(root.get("description")),
+                        "%" + searchText + "%"
+                );
+
+                log.info("Объединяем предикаты для поиска в обоих полях");
+                predicates.add(cb.or(annotationPredicate, descriptionPredicate));
+            }
+            log.info("Возвращаем лист с параметрами поиска");
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 }

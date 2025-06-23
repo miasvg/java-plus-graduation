@@ -27,6 +27,7 @@ public class EventMapper {
                 .requestModeration(request.getRequestModeration())
                 .initiator(user)
                 .state(State.PENDING)
+                .views(0)
                 .build();
         if (request.hasParticipantLimit()) {
             event.setParticipantLimit(request.getParticipantLimit());
@@ -49,8 +50,10 @@ public class EventMapper {
                 .participantLimit(event.getParticipantLimit())
                 .initiator(UserMapper.mapToUserDto(event.getInitiator()))
                 .state(event.getState())
+                .views(event.getViews())
                 .build();
     }
+
     public static EventShortDto mapToShortDto(Event event) {
         return EventShortDto.builder()
                 .annotation(event.getAnnotation())
@@ -62,12 +65,24 @@ public class EventMapper {
                 .views(event.getViews())
                 .build();
     }
-
-
     public static EventFullDto mapToFullDto(Event event) {
         return EventFullDto.builder()
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.mapToDto(event.getCategory()))
-                .createdOn(event.);
+                .confirmedRequests(event.getConfirmedRequests())
+                .createdOn(event.getCreatedOn())
+                .description(event.getDescription())
+                .eventDate(event.getEventDate())
+                .id(event.getId())
+                .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
+                .location(LocationMapper.mapToDto(event.getLocation()))
+                .paid(event.getPaid())
+                .participantLimit(event.getParticipantLimit())
+                .publishedOn(event.getPublishedOn())
+                .requestModeration(event.getRequestModeration())
+                .state(event.getState())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .build();
     }
 }

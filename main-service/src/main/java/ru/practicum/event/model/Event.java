@@ -17,7 +17,11 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "events")
+@Table(name = "events", indexes = {
+        //вроде как так поиск по текстовому запросу должен быстрее работать, но я не уверена, что правильно это применила
+        @Index(name = "idx_event_annotation", columnList = "annotation"),
+        @Index(name = "idx_event_description", columnList = "description")
+})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +31,7 @@ public class Event {
     String title;
 
     //краткая аннотация
-    @Column(name = "annotation", nullable = false)
+    @Column(name = "annotation")
     String annotation;
 
     //полное описание
@@ -69,6 +73,16 @@ public class Event {
     @Enumerated(EnumType.STRING)
     State state;
 
+    // все ниже добавлено для фулл дто
+    @Column(name = "confirmed_requests")
+    int confirmedRequests;
+
+    @Column(name = "created_on")
+    LocalDateTime createdOn;
+
+    @Column(name = "published_on")
+    LocalDateTime publishedOn;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,12 +93,14 @@ public class Event {
                 && Objects.equals(description, event.description) && Objects.equals(eventDate, event.eventDate)
                 && Objects.equals(category, event.category) && Objects.equals(location, event.location)
                 && Objects.equals(paid, event.paid) && Objects.equals(requestModeration, event.requestModeration)
-                && Objects.equals(initiator, event.initiator) && state == event.state;
+                && Objects.equals(initiator, event.initiator) && state == event.state
+                && confirmedRequests == event.confirmedRequests && Objects.equals(createdOn, event.createdOn)
+                && Objects.equals(publishedOn, event.publishedOn);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, title, annotation, description, eventDate, category, location, paid, participantLimit,
-                requestModeration, initiator, views, state);
+                requestModeration, initiator, views, state, confirmedRequests, createdOn, publishedOn);
     }
 }

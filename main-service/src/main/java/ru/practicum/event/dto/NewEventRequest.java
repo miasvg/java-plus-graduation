@@ -1,5 +1,6 @@
 package ru.practicum.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -35,6 +36,7 @@ public class NewEventRequest {
 
     @NotNull
     @ValidEventDate
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime eventDate;
 
     @NotNull
@@ -59,7 +61,7 @@ public class NewEventRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NewEventRequest that = (NewEventRequest) o;
-        return participantLimit == that.participantLimit && Objects.equals(title, that.title)
+        return Objects.equals(participantLimit, that.participantLimit) && Objects.equals(title, that.title)
                 && Objects.equals(annotation, that.annotation) && Objects.equals(description, that.description)
                 && Objects.equals(categoryId, that.categoryId) && Objects.equals(eventDate, that.eventDate)
                 && Objects.equals(location, that.location) && Objects.equals(paid, that.paid)
