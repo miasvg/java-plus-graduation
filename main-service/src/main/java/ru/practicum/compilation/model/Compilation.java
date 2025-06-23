@@ -3,10 +3,10 @@ package ru.practicum.compilation.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.event.model.Event;
 
+import java.util.List;
 import java.util.Objects;
-
-//подборки мероприятий
 
 @Entity
 @Getter
@@ -21,12 +21,19 @@ public class Compilation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "title", nullable = false)
-    String title;
-
     //этот флаг указывает выводить подборку на главный экран или нет, true = выводить
     @Column(name = "pinned")
     Boolean pinned;
+
+    @Column(name = "title", nullable = false)
+    String title;
+
+    @ManyToMany
+    @JoinTable(name = "compilation_event",
+            joinColumns = @JoinColumn(name = "compilation_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    List<Event> events;
 
     @Override
     public boolean equals(Object o) {
