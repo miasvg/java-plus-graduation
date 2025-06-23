@@ -61,6 +61,7 @@ public class PrivateEventController {
         log.info("Отправляем данные в сервис статистики {}", hitDto.toString());
         statClient.sendHit(hitDto);
         return eventService.getByIdPrivate(userId, eventId);
+    }
 
     @GetMapping("/{userId}/requests")
     public List<EventRequestDto> getUsersEventList(@PathVariable Long userId) {

@@ -64,15 +64,15 @@ public class EventMapper {
                 .views(event.getViews())
                 .build();
     }
-    public static EventShortDto mapToShortDto(Event event) {
-        return EventShortDto.builder()
-                .annotation(event.getAnnotation())
-                .category(CategoryMapper.mapToDto(event.getCategory()))
-                .eventDate(event.getEventDate())
-                .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
-                .paid(event.getPaid())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .build();
-    }
+//    public static EventShortDto mapToShortDto(Event event) {
+//        return EventShortDto.builder()
+//                .annotation(event.getAnnotation())
+//                .category(CategoryMapper.mapToDto(event.getCategory()))
+//                .eventDate(event.getEventDate())
+//                .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
+//                .paid(event.getPaid())
+//                .title(event.getTitle())
+//                .views(event.getViews())
+//                .build();
+//    }
 }
