@@ -60,12 +60,49 @@ public class EventServiceImpl implements EventService {
         if (!isEventUpdRequestValid(userId, event)) {
             throw new ConflictException("Данное событие нельзя обновлять");
         }
-        return null;
+        updateEventFields(event, request);
+
+        return EventMapper.mapToFullDto(event);
     }
 
     private boolean isEventUpdRequestValid(Long userId, Event event) {
         return userRepository.existsById(userId) &&
                 event.getInitiator().getId().equals(userId) &&
                 !event.getState().equals(State.PUBLISHED);
+    }
+
+    private void updateEventFields(Event event, UpdateEventUserRequest request) {
+        if (request.getAnnotation() != null) {
+            event.setAnnotation(request.getAnnotation());
+        }
+        if (request.getCategory() != null) {
+            Long id = request.getCategory().longValue();
+            event.setCategory(categoryRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Категория", id)));
+        }
+        if (request.getDescription() != null) {
+            event.setDescription(request.getDescription());
+        }
+        if (request.getEventDate() != null) {
+            event.setEventDate(request.getEventDate());
+        }
+        if (request.getLocation() != null) {
+            event.setLocation(LocationMapper.mapToLocationNew(request.getLocation()));
+        }
+        if (request.getPaid() != null) {
+            event.setPaid(request.getPaid());
+        }
+        if (request.getParticipantLimit() != null) {
+            event.setParticipantLimit(request.getParticipantLimit());
+        }
+        if (request.getRequestModeration() != null) {
+            event.setRequestModeration(request.getRequestModeration());
+        }
+        if (request.getStateAction() != null) {
+            event.setState(State.valueOf(request.getStateAction()));
+        }
+        if (request.getTitle() != null) {
+            event.setTitle(request.getTitle());
+        }
     }
 }

@@ -3,6 +3,7 @@ package ru.practicum.event.mapper;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventDtoPrivate;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventRequest;
 import ru.practicum.event.model.Event;
@@ -60,5 +61,13 @@ public class EventMapper {
                 .title(event.getTitle())
                 .views(event.getViews())
                 .build();
+    }
+
+
+    public static EventFullDto mapToFullDto(Event event) {
+        return EventFullDto.builder()
+                .annotation(event.getAnnotation())
+                .category(CategoryMapper.mapToDto(event.getCategory()))
+                .createdOn(event.);
     }
 }
