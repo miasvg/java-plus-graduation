@@ -1,5 +1,6 @@
 package ru.practicum.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.category.dto.CategoryDto;
@@ -21,6 +22,7 @@ public class EventDtoPrivate {
     String title;
     String annotation;
     String description;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime eventDate;
     CategoryDto category;
     LocationDto location;
@@ -30,6 +32,7 @@ public class EventDtoPrivate {
     UserDto initiator;
     State state;
     int views;
+    LocalDateTime createdOn;
 
     @Override
     public boolean equals(Object o) {

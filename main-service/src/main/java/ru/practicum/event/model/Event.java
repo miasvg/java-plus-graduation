@@ -39,7 +39,7 @@ public class Event {
     String description;
 
     //дата мероприятия
-    @Column(name = "eventDate", nullable = false)
+    @Column(name = "event_date", nullable = false)
     LocalDateTime eventDate;
 
     @ManyToOne
@@ -72,6 +72,9 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     State state;
+
+    @Column(name = "created_on")
+    LocalDateTime createdOn;
 
     @Override
     public boolean equals(Object o) {
