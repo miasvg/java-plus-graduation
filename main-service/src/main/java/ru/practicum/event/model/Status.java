@@ -6,5 +6,7 @@ public enum Status {
     //Заявка принята
     CONFIRMED,
     //Заявка отклонена
-    REJECTED
+    REJECTED,
+    //Заявка отменна создателем
+    CANCELED
 }

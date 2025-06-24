@@ -13,7 +13,7 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NewLocationRequest {
     @NotNull
-    Float lan;
+    Float lat;
 
     @NotNull
     Float lon;
@@ -23,11 +23,11 @@ public class NewLocationRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NewLocationRequest that = (NewLocationRequest) o;
-        return Objects.equals(lan, that.lan) && Objects.equals(lon, that.lon);
+        return Objects.equals(lat, that.lat) && Objects.equals(lon, that.lon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lan, lon);
+        return Objects.hash(lat, lon);
     }
 }

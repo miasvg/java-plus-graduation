@@ -13,6 +13,8 @@ import ru.practicum.location.model.Location;
 import ru.practicum.user.mappers.UserMapper;
 import ru.practicum.user.model.User;
 
+import java.time.LocalDateTime;
+
 public class EventMapper {
     public static Event mapToEventNew(NewEventRequest request, Category category,
                                       Location location, User user) {
@@ -27,6 +29,7 @@ public class EventMapper {
                 .requestModeration(request.getRequestModeration())
                 .initiator(user)
                 .state(State.PENDING)
+                .createdOn(LocalDateTime.now())
                 .views(0)
                 .build();
         if (request.hasParticipantLimit()) {
@@ -45,10 +48,12 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .eventDate(event.getEventDate())
                 .category(CategoryMapper.mapToDto(event.getCategory()))
+                .requestModeration(event.getRequestModeration())
                 .location(LocationMapper.mapToDto(event.getLocation()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .initiator(UserMapper.mapToUserDto(event.getInitiator()))
+                .createdOn(event.getCreatedOn())
                 .state(event.getState())
                 .views(event.getViews())
                 .build();
