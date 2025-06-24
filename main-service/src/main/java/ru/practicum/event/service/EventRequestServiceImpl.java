@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.dto.EventRequestDto;
 import ru.practicum.event.mapper.EventRequestMapper;
 import ru.practicum.event.model.Event;
@@ -54,14 +55,16 @@ public class EventRequestServiceImpl implements EventRequestService {
     }
 
     @Override
+    @Transactional
     public EventRequestDto cancelRequest(Long userId, Long requestId) {
         EventRequest eventRequest = eventRequestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("EventRequest", requestId));
         if (!eventRequest.getId().equals(requestId)) {
             throw new NotValidUserException(userId);
         }
-
-        eventRequestRepository.delete(eventRequest);
-        return mapToEventRequestDto(eventRequest);
+        EventRequest oldEventReques = eventRequest;
+        //eventRequestRepository.delete(eventRequest);
+        eventRequest.setStatus(Status.CANCELED);
+        return mapToEventRequestDto(oldEventReques);
     }
 }

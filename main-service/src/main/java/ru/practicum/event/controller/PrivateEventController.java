@@ -77,7 +77,7 @@ public class PrivateEventController {
         return eventRequestService.createRequest(userId, eventId);
     }
 
-    @PatchMapping("/{userId}/request/{requestId}/cancel")
+    @PatchMapping("/{userId}/requests/{requestId}/cancel")
     public EventRequestDto cancelUserRequestToEvent(@PathVariable Long userId,
                                                     @PathVariable Long requestId) {
         log.info("Отмена запроса с id: {} пользователемс id: {}", requestId, userId);
