@@ -19,8 +19,8 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "lan", nullable = false)
-    Float lan;
+    @Column(name = "lat", nullable = false)
+    Float lat;
 
     @Column(name = "lon", nullable = false)
     Float lon;
@@ -30,11 +30,11 @@ public class Location {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Location location = (Location) o;
-        return Objects.equals(id, location.id) && Objects.equals(lan, location.lan) && Objects.equals(lon, location.lon);
+        return Objects.equals(id, location.id) && Objects.equals(lat, location.lat) && Objects.equals(lon, location.lon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, lan, lon);
+        return Objects.hash(id, lat, lon);
     }
 }

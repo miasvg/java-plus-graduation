@@ -42,8 +42,8 @@ public class EventServiceImpl implements EventService {
         log.info("Начинаем создание мероприятия {} пользователем id = {}", request, userId);
         User initiator = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
         log.info("Получаем пользователя создателя мероприятия {}", initiator);
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new NotFoundException("Category", request.getCategoryId()));
+        Category category = categoryRepository.findById(request.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category", request.getCategory()));
         log.info("Получаем категорию для меропрития {}", category);
         Location location = locationRepository.save(LocationMapper.mapToLocationNew(request.getLocation()));
         log.info("Создаем локацию меропрития {}", location);
