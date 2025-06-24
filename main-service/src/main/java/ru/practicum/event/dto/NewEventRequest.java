@@ -61,7 +61,7 @@ public class NewEventRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NewEventRequest that = (NewEventRequest) o;
-        return participantLimit == that.participantLimit && Objects.equals(title, that.title)
+        return Objects.equals(participantLimit, that.participantLimit) && Objects.equals(title, that.title)
                 && Objects.equals(annotation, that.annotation) && Objects.equals(description, that.description)
                 && Objects.equals(category, that.category) && Objects.equals(eventDate, that.eventDate)
                 && Objects.equals(location, that.location) && Objects.equals(paid, that.paid)

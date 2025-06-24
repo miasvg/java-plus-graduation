@@ -25,3 +25,4 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("UPDATE Event e SET e.views = e.views + 1 WHERE e.id IN :ids")
     void incrementViews(@Param("ids") List<Long> ids);
 }
+

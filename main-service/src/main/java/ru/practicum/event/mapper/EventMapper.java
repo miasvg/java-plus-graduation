@@ -3,6 +3,7 @@ package ru.practicum.event.mapper;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventDtoPrivate;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventRequest;
 import ru.practicum.event.model.Event;
@@ -69,15 +70,24 @@ public class EventMapper {
                 .views(event.getViews())
                 .build();
     }
-//    public static EventShortDto mapToShortDto(Event event) {
-//        return EventShortDto.builder()
-//                .annotation(event.getAnnotation())
-//                .category(CategoryMapper.mapToDto(event.getCategory()))
-//                .eventDate(event.getEventDate())
-//                .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
-//                .paid(event.getPaid())
-//                .title(event.getTitle())
-//                .views(event.getViews())
-//                .build();
-//    }
+    public static EventFullDto mapToFullDto(Event event) {
+        return EventFullDto.builder()
+                .annotation(event.getAnnotation())
+                .category(CategoryMapper.mapToDto(event.getCategory()))
+                .confirmedRequests(event.getConfirmedRequests())
+                .createdOn(event.getCreatedOn())
+                .description(event.getDescription())
+                .eventDate(event.getEventDate())
+                .id(event.getId())
+                .initiator(UserMapper.mapToUserShortDto(event.getInitiator()))
+                .location(LocationMapper.mapToDto(event.getLocation()))
+                .paid(event.getPaid())
+                .participantLimit(event.getParticipantLimit())
+                .publishedOn(event.getPublishedOn())
+                .requestModeration(event.getRequestModeration())
+                .state(event.getState())
+                .title(event.getTitle())
+                .views(event.getViews())
+                .build();
+    }
 }
