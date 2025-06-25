@@ -49,23 +49,30 @@ public class PublicEventController {
     }
 
     @GetMapping
-    public List<EventShortDto> getEventsWithParam(@RequestParam(value = "users", required = false) List<Long> users,
-                                                  @RequestParam(value = "categories", required = false) List<Long> categories,
-                                                  @RequestParam(value = "rangeStart", required = false)
+    public List<EventShortDto> getEventsWithParam(@RequestParam(required = false) String text,
+                                                  @RequestParam(required = false) List<Long> categories,
+                                                  @RequestParam(required = false) Boolean paid,
+                                                  @RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-                                                  @RequestParam(value = "rangeEnd", required = false)
+                                                  @RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                                  @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                  @RequestParam(defaultValue = "10") @Positive Integer size,
+                                                  @RequestParam(defaultValue = "false")
+                                                      Boolean onlyAvailable,
+                                                  @RequestParam(required = false) String sort,
+                                                  @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+                                                  @RequestParam(defaultValue = "10", required = false) @Positive Integer size,
                                                   HttpServletRequest request) {
         log.info("Получаем мероприятия с фильтрацией");
         Pageable page = PageRequest.of(from, size);
         EventSearchParam eventSearchParam = EventSearchParam.builder()
-                .users(users)
+                .text(text)
                 .states(List.of("PUBLISHED"))
                 .categories(categories)
+                .paid(paid)
                 .rangeStart(rangeStart)
                 .rangeEnd(rangeEnd)
+                .onlyAvailable(onlyAvailable)
+                .sort(sort)
                 .build();
         RequestHitDto hitDto = RequestHitDto.builder()
                 .app("ewm-main-service")

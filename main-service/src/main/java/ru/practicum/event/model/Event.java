@@ -83,27 +83,46 @@ public class Event {
     @Column(name = "published_on")
     LocalDateTime publishedOn;
 
-    @Column(name = "created_on")
-    LocalDateTime createdOn;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Event event = (Event) o;
-        return participantLimit == event.participantLimit && views == event.views && Objects.equals(id, event.id)
+        return participantLimit == event.participantLimit && views == event.views
+                && confirmedRequests == event.confirmedRequests && Objects.equals(id, event.id)
                 && Objects.equals(title, event.title) && Objects.equals(annotation, event.annotation)
                 && Objects.equals(description, event.description) && Objects.equals(eventDate, event.eventDate)
                 && Objects.equals(category, event.category) && Objects.equals(location, event.location)
                 && Objects.equals(paid, event.paid) && Objects.equals(requestModeration, event.requestModeration)
                 && Objects.equals(initiator, event.initiator) && state == event.state
-                && confirmedRequests == event.confirmedRequests && Objects.equals(createdOn, event.createdOn)
-                && Objects.equals(publishedOn, event.publishedOn);
+                && Objects.equals(createdOn, event.createdOn) && Objects.equals(publishedOn, event.publishedOn);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, title, annotation, description, eventDate, category, location, paid, participantLimit,
                 requestModeration, initiator, views, state, confirmedRequests, createdOn, publishedOn);
+    }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", annotation='" + annotation + '\'' +
+                ", description='" + description + '\'' +
+                ", eventDate=" + eventDate +
+                ", category=" + category +
+                ", location=" + location +
+                ", paid=" + paid +
+                ", participantLimit=" + participantLimit +
+                ", requestModeration=" + requestModeration +
+                ", initiator=" + initiator +
+                ", views=" + views +
+                ", state=" + state +
+                ", confirmedRequests=" + confirmedRequests +
+                ", createdOn=" + createdOn +
+                ", publishedOn=" + publishedOn +
+                '}';
     }
 }
