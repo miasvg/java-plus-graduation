@@ -13,15 +13,16 @@ import ru.practicum.compilation.service.CompilationService;
 
 @Slf4j
 @RestController
-@RequestMapping("/admin/compilations")
+@RequestMapping(path = "/admin/compilations")
 @RequiredArgsConstructor
 public class AdminCompilationController {
     private final CompilationService compilationService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCompilation(@Valid NewCompilationDto dto) {
+    public CompilationDto createCompilation(@Valid @RequestBody NewCompilationDto dto) {
         log.info("Создание подборки {} для событий с ID: {}", dto.getTitle(), dto.getEvents());
+        System.out.println(dto);
         return compilationService.create(dto);
     }
 

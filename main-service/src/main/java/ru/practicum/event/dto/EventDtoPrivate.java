@@ -32,6 +32,7 @@ public class EventDtoPrivate {
     UserDto initiator;
     State state;
     int views;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdOn;
 
     @Override

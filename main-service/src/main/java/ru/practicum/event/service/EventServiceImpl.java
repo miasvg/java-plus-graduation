@@ -19,6 +19,7 @@ import ru.practicum.event.model.State;
 import ru.practicum.event.model.StateAction;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.ConflictException;
+import ru.practicum.exeption.InvalidRequestException;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.location.mapper.LocationMapper;
 import ru.practicum.location.model.Location;
@@ -60,6 +61,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventRequest request) {
         Event event = getEvent(eventId);
         log.info("Валидация события (id {}) для обновления пользователем (id {})", event.getId(), userId);
@@ -75,14 +77,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventRequest request) {
         Event event = getEvent(eventId);
         log.info("Валидация события (id {}) для обновления", event.getId());
-        if (request.getStateAction().equals(StateAction.PUBLISH_EVENT.toString())
+        if (request.getStateAction() != null
+                && request.getStateAction().equals(StateAction.PUBLISH_EVENT.toString())
                 && !event.getState().equals(State.PENDING)) {
             throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
-        if (request.getStateAction().equals(StateAction.CANCEL_REVIEW.toString())
+        if (request.getStateAction() != null
+                && request.getStateAction().equals(StateAction.CANCEL_REVIEW.toString())
                 && !event.getState().equals(State.PUBLISHED)) {
             throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано ");
         }
@@ -98,8 +103,12 @@ public class EventServiceImpl implements EventService {
 
     private void updateEventFields(Event event, UpdateEventRequest request) {
         if (request.getAnnotation() != null) {
+            String annotation = request.getAnnotation();
+//            if (annotation.length() < 20 || annotation.length() > 2000) {
+//                throw new InvalidRequestException("Длина аннотации не соответствует требованиям");
+//            }
             log.debug("Обновление краткого описания события");
-            event.setAnnotation(request.getAnnotation());
+            event.setAnnotation(annotation);
         }
         if (request.getCategory() != null) {
             Long id = request.getCategory().longValue();
@@ -108,22 +117,33 @@ public class EventServiceImpl implements EventService {
             log.debug("Обновление категории события");
         }
         if (request.getDescription() != null) {
+            String desc = request.getDescription();
+//            if (desc.length() < 20 || desc.length() > 7000) {
+//                throw new InvalidRequestException("Длина описания не соответствует требованиям");
+//            }
             log.debug("Обновление полного описания");
-            event.setDescription(request.getDescription());
+            event.setDescription(desc);
         }
         if (request.getEventDate() != null) {
+            if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new InvalidRequestException("Событие не может начинаться раньше, чем через 2 часа");
+            }
             log.debug("Обновление даты и времени события");
             event.setEventDate(request.getEventDate());
         }
         if (request.getLocation() != null) {
             log.debug("Обновление места проведения события");
-            event.setLocation(LocationMapper.mapToLocationNew(request.getLocation()));
+            Location newLocation = locationRepository.save(LocationMapper.mapToLocationNew(request.getLocation()));
+            event.setLocation(newLocation);
         }
         if (request.getPaid() != null) {
             log.debug("Обновление поля необходимости оплаты события");
             event.setPaid(request.getPaid());
         }
         if (request.getParticipantLimit() != null) {
+            if (request.getParticipantLimit() < 0) {
+                throw new InvalidRequestException("Лимит участников не может быть отрицательным");
+            }
             log.debug("Обновление лимита участников события");
             event.setParticipantLimit(request.getParticipantLimit());
         }
@@ -139,14 +159,19 @@ public class EventServiceImpl implements EventService {
                     break;
                 case "PUBLISH_EVENT":
                     event.setState(State.PUBLISHED);
+                    event.setPublishedOn(LocalDateTime.now());
                     break;
                 default:
                     event.setState(State.CANCELED);
             }
         }
         if (request.getTitle() != null) {
+            String title = request.getTitle();
+//            if (title.length() < 3 || title.length() > 120) {
+//                throw new InvalidRequestException("Длина заголовка не соответствует требованиям");
+//            }
             log.debug("Обновление заголовка события");
-            event.setTitle(request.getTitle());
+            event.setTitle(title);
         }
     }
 
