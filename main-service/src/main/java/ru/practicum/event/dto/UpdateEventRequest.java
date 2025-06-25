@@ -2,6 +2,7 @@ package ru.practicum.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.location.dto.NewLocationRequest;
 import ru.practicum.validator.ValidEventDate;
 
@@ -14,6 +15,7 @@ public class UpdateEventRequest {
     String description;
     @ValidEventDate
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime eventDate;
     NewLocationRequest location;
     Boolean paid;
