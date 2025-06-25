@@ -53,4 +53,24 @@ public class EventDtoPrivate {
         return Objects.hash(id, title, annotation, description, eventDate, category, location, paid, participantLimit,
                 requestModeration, initiator, state, views);
     }
+
+    @Override
+    public String toString() {
+        return "EventDtoPrivate{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", annotation='" + annotation + '\'' +
+                ", description='" + description + '\'' +
+                ", eventDate=" + eventDate +
+                ", category=" + category +
+                ", location=" + location +
+                ", paid=" + paid +
+                ", participantLimit=" + participantLimit +
+                ", requestModeration=" + requestModeration +
+                ", initiator=" + initiator +
+                ", state=" + state +
+                ", views=" + views +
+                ", createdOn=" + createdOn +
+                '}';
+    }
 }

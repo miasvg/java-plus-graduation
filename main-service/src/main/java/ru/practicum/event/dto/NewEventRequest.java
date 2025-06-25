@@ -73,4 +73,19 @@ public class NewEventRequest {
         return Objects.hash(title, annotation, description, category, eventDate, location, paid,
                 participantLimit, requestModeration);
     }
+
+    @Override
+    public String toString() {
+        return "NewEventRequest{" +
+                "title='" + title + '\'' +
+                ", annotation='" + annotation + '\'' +
+                ", description='" + description + '\'' +
+                ", category=" + category +
+                ", eventDate=" + eventDate +
+                ", location=" + location +
+                ", paid=" + paid +
+                ", participantLimit=" + participantLimit +
+                ", requestModeration=" + requestModeration +
+                '}';
+    }
 }

@@ -68,6 +68,13 @@ public class EventMapper {
                 .paid(event.getPaid())
                 .title(event.getTitle())
                 .views(event.getViews())
+                .description(event.getDescription())
+                .participantLimit(event.getParticipantLimit())
+                .state(event.getState())
+                .createdOn(event.getCreatedOn())
+                .publishedOn(event.getPublishedOn())
+                .location(LocationMapper.mapToDto(event.getLocation()))
+                .requestModeration(event.getRequestModeration())
                 .build();
     }
     public static EventFullDto mapToFullDto(Event event) {
