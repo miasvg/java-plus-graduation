@@ -39,7 +39,7 @@ public class Event {
     String description;
 
     //дата мероприятия
-    @Column(name = "eventDate", nullable = false)
+    @Column(name = "event_date", nullable = false)
     LocalDateTime eventDate;
 
     @ManyToOne
@@ -73,6 +73,19 @@ public class Event {
     @Enumerated(EnumType.STRING)
     State state;
 
+    // все ниже добавлено для фулл дто
+    @Column(name = "confirmed_requests")
+    int confirmedRequests;
+
+    @Column(name = "created_on")
+    LocalDateTime createdOn;
+
+    @Column(name = "published_on")
+    LocalDateTime publishedOn;
+
+    @Column(name = "created_on")
+    LocalDateTime createdOn;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -83,12 +96,14 @@ public class Event {
                 && Objects.equals(description, event.description) && Objects.equals(eventDate, event.eventDate)
                 && Objects.equals(category, event.category) && Objects.equals(location, event.location)
                 && Objects.equals(paid, event.paid) && Objects.equals(requestModeration, event.requestModeration)
-                && Objects.equals(initiator, event.initiator) && state == event.state;
+                && Objects.equals(initiator, event.initiator) && state == event.state
+                && confirmedRequests == event.confirmedRequests && Objects.equals(createdOn, event.createdOn)
+                && Objects.equals(publishedOn, event.publishedOn);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, title, annotation, description, eventDate, category, location, paid, participantLimit,
-                requestModeration, initiator, views, state);
+                requestModeration, initiator, views, state, confirmedRequests, createdOn, publishedOn);
     }
 }

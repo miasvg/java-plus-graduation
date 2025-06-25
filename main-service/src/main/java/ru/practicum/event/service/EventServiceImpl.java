@@ -10,13 +10,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
-import ru.practicum.event.dto.EventDtoPrivate;
-import ru.practicum.event.dto.EventSearchParam;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.State;
+import ru.practicum.event.model.StateAction;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.location.mapper.LocationMapper;
 import ru.practicum.location.model.Location;
@@ -42,8 +42,8 @@ public class EventServiceImpl implements EventService {
         log.info("Начинаем создание мероприятия {} пользователем id = {}", request, userId);
         User initiator = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
         log.info("Получаем пользователя создателя мероприятия {}", initiator);
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new NotFoundException("Category", request.getCategoryId()));
+        Category category = categoryRepository.findById(request.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category", request.getCategory()));
         log.info("Получаем категорию для меропрития {}", category);
         Location location = locationRepository.save(LocationMapper.mapToLocationNew(request.getLocation()));
         log.info("Создаем локацию меропрития {}", location);
@@ -51,6 +51,97 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.save(create);
         log.info("Создание меропрития {} завершено", event);
         return EventMapper.mapToDtoPrivate(event);
+    }
+
+    @Override
+    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventRequest request) {
+        Event event = getEvent(eventId);
+        log.info("Валидация события (id {}) для обновления пользователем (id {})", event.getId(), userId);
+        if (!(userRepository.existsById(userId) &&
+                event.getInitiator().getId().equals(userId) &&
+                !event.getState().equals(State.PUBLISHED))) {
+            log.warn("Конфликт при запросе на обновление события");
+            throw new ConflictException("Данное событие нельзя обновлять");
+        }
+        updateEventFields(event, request);
+
+        return EventMapper.mapToFullDto(eventRepository.save(event));
+    }
+
+    @Override
+    public EventFullDto updateEventByAdmin(Long eventId, UpdateEventRequest request) {
+        Event event = getEvent(eventId);
+        log.info("Валидация события (id {}) для обновления", event.getId());
+        if (request.getStateAction().equals(StateAction.PUBLISH_EVENT.toString())
+                && !event.getState().equals(State.PENDING)) {
+            throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
+        }
+        if (request.getStateAction().equals(StateAction.CANCEL_REVIEW.toString())
+                && !event.getState().equals(State.PUBLISHED)){
+            throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано ");
+        }
+        updateEventFields(event, request);
+        return EventMapper.mapToFullDto(eventRepository.save(event));
+    }
+
+    private Event getEvent(Long id) {
+        log.info("Поиск мероприятия (id {})", id);
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Событие", id));
+    }
+
+    private void updateEventFields(Event event, UpdateEventRequest request) {
+        if (request.getAnnotation() != null) {
+            log.debug("Обновление краткого описания события");
+            event.setAnnotation(request.getAnnotation());
+        }
+        if (request.getCategory() != null) {
+            Long id = request.getCategory().longValue();
+            event.setCategory(categoryRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Категория", id)));
+            log.debug("Обновление категории события");
+        }
+        if (request.getDescription() != null) {
+            log.debug("Обновление полного описания");
+            event.setDescription(request.getDescription());
+        }
+        if (request.getEventDate() != null) {
+            log.debug("Обновление даты и времени события");
+            event.setEventDate(request.getEventDate());
+        }
+        if (request.getLocation() != null) {
+            log.debug("Обновление места проведения события");
+            event.setLocation(LocationMapper.mapToLocationNew(request.getLocation()));
+        }
+        if (request.getPaid() != null) {
+            log.debug("Обновление поля необходимости оплаты события");
+            event.setPaid(request.getPaid());
+        }
+        if (request.getParticipantLimit() != null) {
+            log.debug("Обновление лимита участников события");
+            event.setParticipantLimit(request.getParticipantLimit());
+        }
+        if (request.getRequestModeration() != null) {
+            log.debug("Обновление статуса пре-модерации для события");
+            event.setRequestModeration(request.getRequestModeration());
+        }
+        if (request.getStateAction() != null) {
+            log.debug("Обновление статуса события");
+            switch (request.getStateAction()){
+                case "SEND_TO_REVIEW":
+                    event.setState(State.PENDING);
+                    break;
+                case "PUBLISH_EVENT":
+                    event.setState(State.PUBLISHED);
+                    break;
+                default:
+                    event.setState(State.CANCELED);
+            }
+        }
+        if (request.getTitle() != null) {
+            log.debug("Обновление заголовка события");
+            event.setTitle(request.getTitle());
+        }
     }
 
     @Override

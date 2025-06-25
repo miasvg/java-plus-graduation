@@ -12,7 +12,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LocationDto {
-    Float lan;
+    Float lat;
     Float lon;
 
     @Override
@@ -20,11 +20,11 @@ public class LocationDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LocationDto that = (LocationDto) o;
-        return Objects.equals(lan, that.lan) && Objects.equals(lon, that.lon);
+        return Objects.equals(lat, that.lat) && Objects.equals(lon, that.lon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lan, lon);
+        return Objects.hash(lat, lon);
     }
 }

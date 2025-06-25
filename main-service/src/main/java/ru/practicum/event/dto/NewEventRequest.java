@@ -32,7 +32,7 @@ public class NewEventRequest {
     String description;
 
     @NotNull
-    Long categoryId;
+    Long category;
 
     @NotNull
     @ValidEventDate
@@ -61,16 +61,16 @@ public class NewEventRequest {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         NewEventRequest that = (NewEventRequest) o;
-        return participantLimit == that.participantLimit && Objects.equals(title, that.title)
+        return Objects.equals(participantLimit, that.participantLimit) && Objects.equals(title, that.title)
                 && Objects.equals(annotation, that.annotation) && Objects.equals(description, that.description)
-                && Objects.equals(categoryId, that.categoryId) && Objects.equals(eventDate, that.eventDate)
+                && Objects.equals(category, that.category) && Objects.equals(eventDate, that.eventDate)
                 && Objects.equals(location, that.location) && Objects.equals(paid, that.paid)
                 && Objects.equals(requestModeration, that.requestModeration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, annotation, description, categoryId, eventDate, location, paid,
+        return Objects.hash(title, annotation, description, category, eventDate, location, paid,
                 participantLimit, requestModeration);
     }
 }

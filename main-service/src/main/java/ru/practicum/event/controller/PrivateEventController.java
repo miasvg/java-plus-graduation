@@ -13,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.StatClient;
 import ru.practicum.dto.RequestHitDto;
-import ru.practicum.event.dto.EventDtoPrivate;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.EventRequestDto;
-import ru.practicum.event.dto.NewEventRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.service.EventRequestService;
 import ru.practicum.event.service.EventService;
 
@@ -38,6 +35,14 @@ public class PrivateEventController {
                                     @RequestBody @Valid NewEventRequest request) {
         log.info("Сохранение мероприятия");
         return eventService.addEvent(userId, request);
+    }
+
+    @PatchMapping("/{userId}/events/{eventId}")
+    public EventFullDto updateEvent(@PathVariable @Positive Long userId,
+                                    @PathVariable @Positive Long eventId,
+                                    @RequestBody UpdateEventRequest request) {
+        log.info(String.format("Обновление события с id %s пользователем с id %d", eventId, userId));
+        return eventService.updateEventByUser(userId, eventId, request);
     }
 
     @GetMapping("/{userId}/events")
@@ -77,7 +82,7 @@ public class PrivateEventController {
         return eventRequestService.createRequest(userId, eventId);
     }
 
-    @PatchMapping("/{userId}/request/{requestId}/cancel")
+    @PatchMapping("/{userId}/requests/{requestId}/cancel")
     public EventRequestDto cancelUserRequestToEvent(@PathVariable Long userId,
                                                     @PathVariable Long requestId) {
         log.info("Отмена запроса с id: {} пользователемс id: {}", requestId, userId);
