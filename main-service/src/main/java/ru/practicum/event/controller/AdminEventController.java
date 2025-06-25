@@ -27,15 +27,15 @@ public class AdminEventController {
 
     @GetMapping
     public List<EventShortDto> getEvents(
-            @RequestParam(value = "users", required = false) List<Long> users,
-            @RequestParam(value = "states", required = false) List<String> states,
-            @RequestParam(value = "categories", required = false) List<Long> categories,
-            @RequestParam(value = "rangeStart", required = false)
+            @RequestParam(required = false) List<Long> users,
+            @RequestParam(required = false) List<String> states,
+            @RequestParam(required = false) List<Long> categories,
+            @RequestParam(required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam(value = "rangeEnd", required = false)
+            @RequestParam(required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size) {
+            @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         Pageable page = PageRequest.of(from, size);
         EventSearchParam eventSearchParam = EventSearchParam.builder()
                 .users(users)
