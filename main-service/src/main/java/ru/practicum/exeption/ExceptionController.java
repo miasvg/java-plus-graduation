@@ -27,6 +27,17 @@ public class ExceptionController {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDto invalidRequestExceptionHandler (InvalidRequestException e) {
+        return ExceptionDto.builder()
+                .status(HttpStatus.BAD_REQUEST.toString())
+                .reason("request is invalid")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionDto userNotExistExceptionHandler(UserNotExistException e) {
         return ExceptionDto.builder()

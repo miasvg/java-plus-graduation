@@ -16,14 +16,14 @@ import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    Page<Event> findByInitiatorIdAndState(Long initiator_id, State state, Pageable page);
+    List<Event> findByInitiatorIdAndState(Long initiator_id, State state, Pageable page);
 
     Optional<Event> findByIdAndState(Long id, State state);
 
-    Page<Event> findAll(Specification<Event> spec, Pageable pageable);
+    List<Event> findAll(Specification<Event> spec, Pageable pageable);
 
     @Modifying
-    @Query("UPDATE Event e SET e.views = e.views + 1 WHERE e.id IN :ids")
-    void incrementViews(@Param("ids") List<Long> ids);
+    @Query("UPDATE Event e SET e.views = :views WHERE e.id = :eventId")
+    void updateViews(@Param("eventId") Long eventId, @Param("views") int views);
 }
 

@@ -42,14 +42,12 @@ public class NewEventRequest {
     @NotNull
     NewLocationRequest location;
 
-    @NotNull
-    Boolean paid;
+    Boolean paid = false;
 
     @PositiveOrZero
     Integer participantLimit;
 
-    @NotNull
-    Boolean requestModeration;
+    Boolean requestModeration = true;
 
     //метод проверки наличия поля, иначе ставим 0
     public boolean hasParticipantLimit() {
