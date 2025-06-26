@@ -27,7 +27,6 @@ import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -87,8 +86,8 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
         if (request.getStateAction() != null
-                && request.getStateAction().equals(StateAction.CANCEL_REVIEW.toString())
-                && !event.getState().equals(State.PUBLISHED)) {
+                && request.getStateAction().equals(StateAction.REJECT_EVENT.toString())
+                && event.getState().equals(State.PUBLISHED)) {
             throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано ");
         }
         updateEventFields(event, request);
@@ -103,12 +102,8 @@ public class EventServiceImpl implements EventService {
 
     private void updateEventFields(Event event, UpdateEventRequest request) {
         if (request.getAnnotation() != null) {
-            String annotation = request.getAnnotation();
-//            if (annotation.length() < 20 || annotation.length() > 2000) {
-//                throw new InvalidRequestException("Длина аннотации не соответствует требованиям");
-//            }
             log.debug("Обновление краткого описания события");
-            event.setAnnotation(annotation);
+            event.setAnnotation(request.getAnnotation());
         }
         if (request.getCategory() != null) {
             Long id = request.getCategory().longValue();
@@ -117,12 +112,8 @@ public class EventServiceImpl implements EventService {
             log.debug("Обновление категории события");
         }
         if (request.getDescription() != null) {
-            String desc = request.getDescription();
-//            if (desc.length() < 20 || desc.length() > 7000) {
-//                throw new InvalidRequestException("Длина описания не соответствует требованиям");
-//            }
             log.debug("Обновление полного описания");
-            event.setDescription(desc);
+            event.setDescription(request.getDescription());
         }
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
@@ -166,12 +157,8 @@ public class EventServiceImpl implements EventService {
             }
         }
         if (request.getTitle() != null) {
-            String title = request.getTitle();
-//            if (title.length() < 3 || title.length() > 120) {
-//                throw new InvalidRequestException("Длина заголовка не соответствует требованиям");
-//            }
             log.debug("Обновление заголовка события");
-            event.setTitle(title);
+            event.setTitle(request.getTitle());
         }
     }
 

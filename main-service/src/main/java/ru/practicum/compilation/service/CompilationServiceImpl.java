@@ -50,6 +50,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto create(NewCompilationDto dto) {
         Compilation newCompilation = CompilationMapper.mapToCompilation(dto);
         newCompilation.setEvents(getEventsByIds(dto.getEvents()));
+
         return CompilationMapper.mapToDto(compilationRepository.save(newCompilation));
     }
 
