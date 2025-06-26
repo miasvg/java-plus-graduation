@@ -37,6 +37,7 @@ public class AdminEventController {
             @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         Pageable page = PageRequest.of(from, size);
+        log.info("Получаем события в Админ API с фильтрацией");
         EventSearchParam eventSearchParam = EventSearchParam.builder()
                 .users(users)
                 .states(states)
@@ -47,9 +48,10 @@ public class AdminEventController {
         return eventService.getEventsWithParamAdmin(eventSearchParam, page);
     }
 
-    @PatchMapping("/eventId")
+    @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
                                     @RequestBody @Valid UpdateEventRequest request) {
+        log.info("Публикация события в Админ API");
         return eventService.updateEventByAdmin(eventId, request);
     }
 }
