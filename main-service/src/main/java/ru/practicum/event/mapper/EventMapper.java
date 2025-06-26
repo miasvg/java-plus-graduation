@@ -2,7 +2,6 @@ package ru.practicum.event.mapper;
 
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
-import ru.practicum.event.dto.EventDtoPrivate;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventRequest;
@@ -40,25 +39,6 @@ public class EventMapper {
         return event;
     }
 
-    public static EventDtoPrivate mapToDtoPrivate(Event event) {
-        return EventDtoPrivate.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .description(event.getDescription())
-                .annotation(event.getAnnotation())
-                .eventDate(event.getEventDate())
-                .category(CategoryMapper.mapToDto(event.getCategory()))
-                .requestModeration(event.getRequestModeration())
-                .location(LocationMapper.mapToDto(event.getLocation()))
-                .paid(event.getPaid())
-                .participantLimit(event.getParticipantLimit())
-                .initiator(UserMapper.mapToUserDto(event.getInitiator()))
-                .createdOn(event.getCreatedOn())
-                .state(event.getState())
-                .views(event.getViews())
-                .build();
-    }
-
     public static EventShortDto mapToShortDto(Event event) {
         return EventShortDto.builder()
                 .annotation(event.getAnnotation())
@@ -75,6 +55,7 @@ public class EventMapper {
                 .publishedOn(event.getPublishedOn())
                 .location(LocationMapper.mapToDto(event.getLocation()))
                 .requestModeration(event.getRequestModeration())
+                .confirmedRequests(event.getConfirmedRequests())
                 .build();
     }
     public static EventFullDto mapToFullDto(Event event) {

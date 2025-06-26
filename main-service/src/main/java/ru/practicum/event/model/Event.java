@@ -46,7 +46,7 @@ public class Event {
     @JoinColumn(name = "category_id")
     Category category;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "location_id")
     Location location;
 
