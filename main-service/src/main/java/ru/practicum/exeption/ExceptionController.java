@@ -16,10 +16,10 @@ public class ExceptionController {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionDto emailMustBeUniqueExceptionHandler(EmailMustBeUniqueException e) {
         return ExceptionDto.builder()
-                .status(HttpStatus.BAD_REQUEST.toString())
+                .status(HttpStatus.CONFLICT.toString())
                 .reason("email not unique")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
