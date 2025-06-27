@@ -60,6 +60,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventRequest request) {
         Event event = getEvent(eventId);
         log.info("Валидация события (id {}) для обновления пользователем (id {})", event.getId(), userId);
@@ -82,32 +83,17 @@ public class EventServiceImpl implements EventService {
         if (request.getStateAction() != null
                 && request.getStateAction().equals(StateAction.PUBLISH_EVENT.toString())
                 && !event.getState().equals(State.PENDING)) {
+            log.warn("Попытка публикации события, которое не в ожидании публикации");
             throw new ConflictException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
         if (request.getStateAction() != null
-                && request.getStateAction().equals(StateAction.CANCEL_REVIEW.toString())
-                && !event.getState().equals(State.PUBLISHED)) {
+                && request.getStateAction().equals(StateAction.REJECT_EVENT.toString())
+                && event.getState().equals(State.PUBLISHED)) {
+            log.warn("Попытка отклонения события, которое уже опубликовано");
             throw new ConflictException("Событие можно отклонить, только если оно еще не опубликовано ");
         }
         updateEventFields(event, request);
         return EventMapper.mapToFullDto(eventRepository.save(event));
-    }
-
-    private Event getEvent(Long id) {
-        log.info("Поиск мероприятия (id {})", id);
-        return eventRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Событие", id));
-    }
-
-    @Transactional
-    @Override
-    public EventFullDto getByIdPublic(Long eventId, String ip) {
-        log.info("Начинаем поиск мероприятия id = {} со статусом Published", eventId);
-        Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
-                .orElseThrow(() -> new NotFoundException("Event", eventId));
-        log.info("Мероприятие найдено: {}", event);
-        updateViews(eventId, ip);
-        return EventMapper.mapToFullDto(event);
     }
 
     @Transactional
@@ -118,6 +104,17 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Event", eventId));
         updateViews(event.getId(), ip);
         log.info("Мероприятие успешно получено: {}", event);
+        return EventMapper.mapToFullDto(event);
+    }
+
+    @Transactional
+    @Override
+    public EventFullDto getByIdPublic(Long eventId, String ip) {
+        log.info("Начинаем поиск мероприятия id = {} со статусом Published", eventId);
+        Event event = eventRepository.findByIdAndState(eventId, State.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Event", eventId));
+        log.info("Мероприятие найдено: {}", event);
+        updateViews(eventId, ip);
         return EventMapper.mapToFullDto(event);
     }
 
@@ -163,11 +160,16 @@ public class EventServiceImpl implements EventService {
         return events;
     }
 
+    private Event getEvent(Long id) {
+        log.info("Поиск мероприятия (id {})", id);
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Событие", id));
+    }
+
     private void updateEventFields(Event event, UpdateEventRequest request) {
         if (request.getAnnotation() != null) {
-            String annotation = request.getAnnotation();
             log.debug("Обновление краткого описания события");
-            event.setAnnotation(annotation);
+            event.setAnnotation(request.getAnnotation());
         }
         if (request.getCategory() != null) {
             Long id = request.getCategory().longValue();
@@ -176,12 +178,12 @@ public class EventServiceImpl implements EventService {
             log.debug("Обновление категории события");
         }
         if (request.getDescription() != null) {
-            String desc = request.getDescription();
             log.debug("Обновление полного описания");
-            event.setDescription(desc);
+            event.setDescription(request.getDescription());
         }
         if (request.getEventDate() != null) {
             if (request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                log.warn("Попытка публикации события c датой, не соответствующей требованиям: {}", request.getEventDate());
                 throw new InvalidRequestException("Событие не может начинаться раньше, чем через 2 часа");
             }
             log.debug("Обновление даты и времени события");
@@ -222,9 +224,8 @@ public class EventServiceImpl implements EventService {
             }
         }
         if (request.getTitle() != null) {
-            String title = request.getTitle();
             log.debug("Обновление заголовка события");
-            event.setTitle(title);
+            event.setTitle(request.getTitle());
         }
     }
 

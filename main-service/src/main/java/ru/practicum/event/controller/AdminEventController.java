@@ -50,7 +50,7 @@ public class AdminEventController {
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
-                                    @RequestBody @Valid UpdateEventRequest request) {
+                                    @Valid @RequestBody UpdateEventRequest request) {
         log.info("Публикация события в Админ API");
         return eventService.updateEventByAdmin(eventId, request);
     }

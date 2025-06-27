@@ -74,6 +74,10 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private List<Event> getEventsByIds(List<Long> ids) {
+        if (ids == null) {
+            return List.of();
+        }
+
         List<Event> compEvents = eventRepository.findAllById(ids);
 
         if (compEvents.size() != ids.size()) {

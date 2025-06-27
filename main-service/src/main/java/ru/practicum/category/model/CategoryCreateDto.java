@@ -2,6 +2,8 @@ package ru.practicum.category.model;
 
 //потом перенесем в отдельный модуль все дто
 // в спеке это NewCategoryDto
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -10,5 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryCreateDto {
+    @NotBlank
+    @Size(min = 1, max = 50)
     private String name;
 }
