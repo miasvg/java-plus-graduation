@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.event.model.Views;
 
-import java.util.List;
-
 public interface ViewsRepository extends JpaRepository<Views, Long> {
 
     @Modifying
