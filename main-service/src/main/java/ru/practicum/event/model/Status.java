@@ -5,7 +5,7 @@ public enum Status {
     PENDING,
     //Заявка принята
     CONFIRMED,
-    //Заявка отклонена
+    //Заявка отклонена модератором
     REJECTED,
     //Заявка отменна создателем
     CANCELED
