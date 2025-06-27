@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findByInitiatorIdAndState(Long initiator_id, State state, Pageable page);
+    Page<Event> findByInitiatorId(Long initiator_id, Pageable page);
 
     Optional<Event> findByIdAndState(Long id, State state);
 
@@ -25,5 +25,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Modifying
     @Query("UPDATE Event e SET e.views = :views WHERE e.id = :eventId")
     void updateViews(@Param("eventId") Long eventId, @Param("views") int views);
+
+    Optional<Event> findByIdAndInitiatorId(Long id, Long initiator_id);
 }
 

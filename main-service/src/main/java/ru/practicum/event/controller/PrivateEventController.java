@@ -1,6 +1,5 @@
 package ru.practicum.event.controller;
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;

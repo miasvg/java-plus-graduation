@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,6 @@ import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,10 +113,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public EventFullDto getByIdPrivate(Long userId, Long eventId, String ip) {
-        log.info("Получаем пользователя с id = {}", userId);
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
         log.info("Начинаем получение мероприятия id = {}", eventId);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event", eventId));
+        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+                .orElseThrow(() -> new NotFoundException("Event", eventId));
         updateViews(event.getId(), ip);
         log.info("Мероприятие успешно получено: {}", event);
         return EventMapper.mapToFullDto(event);
@@ -126,10 +125,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getUsersEvents(Long userId, Pageable page, String ip) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
-        List<Event> events = eventRepository.findByInitiatorIdAndState(userId, State.PUBLISHED, page);
+        Page<Event> events = eventRepository.findByInitiatorId(userId, page);
         events.forEach(event -> updateViews(event.getId(), ip));
-        log.info("Получаем все опубликованные мероприятия для пользователя id = {}", userId);
+        log.info("Получаем все опубликованные мероприятия для пользователя id = {}: размер списка: {}, " +
+                "список меропритий: {}", userId, events.getSize(), events.getContent());
         return events.stream()
+                .sequential()
                 .map(EventMapper::mapToShortDto)
                 .toList();
     }
@@ -238,58 +239,61 @@ public class EventServiceImpl implements EventService {
     }
 
     private Specification<Event> createSpecification(final EventSearchParam searchParam) {
-        if (searchParam.getRangeStart().isAfter(searchParam.getRangeEnd())) {
+        LocalDateTime rangeStart = searchParam.getRangeStart();
+        LocalDateTime rangeEnd = searchParam.getRangeEnd();
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             log.error("Конец выборки находится во временной шкале раньше начала");
             throw new InvalidRequestException("Время окончания выборки не может быть раньше времени начала");
         }
         return (root, query, cb) -> {
             log.info("Начинаем фильтрацию переданных параметров");
             List<Predicate> predicates = new ArrayList<>();
+            List<String> predicateLogs = new ArrayList<>();
 
             log.info("Проводим фильтрацию по пользователям {}", searchParam.getUsers());
             if (searchParam.getUsers() != null && !searchParam.getUsers().isEmpty() &&
                     searchParam.getUsers().getFirst() != 0) {
+                predicateLogs.add("Пользователи: " + searchParam.getUsers());
                 predicates.add(root.get("initiator").get("id").in(searchParam.getUsers()));
             }
 
             log.info("Проводим фильтрацию по состояниям {}", searchParam.getStates());
             if (searchParam.getStates() != null && !searchParam.getStates().isEmpty()) {
+                predicateLogs.add("Статусы: " + searchParam.getStates());
                 predicates.add(root.get("state").in(searchParam.getStates()));
             }
 
             log.info("Проводим фильтрацию по категориям {}", searchParam.getCategories());
             if (searchParam.getCategories() != null && !searchParam.getCategories().isEmpty() &&
                     searchParam.getCategories().getFirst() != 0) {
+                predicateLogs.add("Категории: " + searchParam.getCategories());
                 predicates.add(root.get("category").get("id").in(searchParam.getCategories()));
             }
 
-            log.info("Проводим фильтрацию по начальному времени диапазона выборки {}", searchParam.getRangeStart());
-            if (searchParam.getRangeStart() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), searchParam.getRangeStart()));
-            }
+            log.info("Проводим фильтарацию по временным рамкам: {}, {}", rangeStart, rangeEnd);
+            if (rangeStart != null && rangeEnd != null) {
+                log.info("Фильтрация по времени начала мероприятия, начальное время: {} конечное время {}",
+                        rangeStart, rangeEnd);
+                predicateLogs.add("Временной диапазон: от " + rangeStart + " до " + rangeEnd);
+                predicates.add(cb.between(root.get("eventDate"), rangeStart, rangeEnd));
+            } else {
+                if (rangeStart != null) {
+                    log.info("Время окончания выборки не указано, проводим фильтрацию по всем событиям от {}", rangeStart);
+                    predicateLogs.add("Время начала выборки: " + rangeStart);
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
+                }
 
-            log.info("Проводим фильтрацию по окончанию диапазона выборки {}", searchParam.getRangeEnd());
-            if (searchParam.getRangeEnd() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("eventDate"), searchParam.getRangeEnd()));
-            }
+                if (rangeEnd != null) {
+                    log.info("Время начала выборки не указано, проводим фильтрацию по всем событиям до {}", rangeEnd);
+                    predicateLogs.add("Время окончания выборки: " + rangeEnd);
+                    predicates.add(cb.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
+                }
 
-            log.info("Установка диапазона выборки при нулевом значении rangeStart и нулевом значении rangeEnd");
-            if (searchParam.getRangeStart() == null && searchParam.getRangeEnd() == null) {
-                log.info("Диапазон начальной даты не указан, выборка проводится по предстоящим событиям");
-                predicates.add(cb.greaterThan(
-                        root.get("eventDate"),
-                        cb.currentTimestamp()
-                ));
-            }
-
-            log.info("Установка диапазона выборки при нулевом значении rangeStart и указанном значении rangeEnd");
-            if (searchParam.getRangeStart() == null && searchParam.getRangeEnd() != null) {
-                log.info("Диапазон начальной и конечной даты не указан, выборка проводится по всем предстоящим событиям");
-                Expression<Timestamp> currentTime = cb.currentTimestamp();
-                Expression<LocalDateTime> eventDate = root.get("eventDate");
-                predicates.add(cb.greaterThan(eventDate,
-                        cb.function("to_timestamp", LocalDateTime.class, currentTime)));
-                predicates.add(cb.lessThanOrEqualTo(root.get("eventDate"), searchParam.getRangeEnd()));
+                if (rangeStart == null && rangeEnd == null) {
+                    log.info("Диапазон не указан, выборка по всем предстоящим событиям");
+                    predicateLogs.add("Время выборки не указано, выборка по предстоящим событиям от: " + LocalDateTime.now());
+                    predicates.add(cb.greaterThan(root.get("eventDate"), cb.currentTimestamp()));
+                }
             }
 
             log.info("Проводим текстовый поиск по запросу {}", searchParam.getText());
@@ -312,7 +316,7 @@ public class EventServiceImpl implements EventService {
                             cb.lower(root.get("description")),
                             "%" + searchText + "%"
                     );
-
+                    predicateLogs.add("Поиск по текстовому запросу: " + searchParam.getText());
                     log.info("Объединяем предикаты для поиска в обоих полях");
                     predicates.add(cb.or(annotationPredicate, descriptionPredicate));
                 }
@@ -322,9 +326,11 @@ public class EventServiceImpl implements EventService {
             if (searchParam.getSort() != null) {
                 switch (searchParam.getSort().toUpperCase()) {
                     case "EVENT_DATE":
+                        predicateLogs.add("Поиск с сортировкой по: EVENT_DATE");
                         query.orderBy(cb.asc(root.get("eventDate")));
                         break;
                     case "VIEWS":
+                        predicateLogs.add("Поиск с сортировкой по: VIEWS");
                         query.orderBy(cb.asc(root.get("views")));
                         break;
                 }
@@ -332,21 +338,24 @@ public class EventServiceImpl implements EventService {
 
             log.info("Проводим поиск по paid {}", searchParam.getPaid());
             if (searchParam.getPaid() != null) {
+                predicateLogs.add("Поиск по paid с флагом: " + searchParam.getPaid());
                 predicates.add(cb.lessThanOrEqualTo(root.get("paid"), searchParam.getPaid()));
             }
 
             log.info("Проводим поиск по onlyAvailable {}", searchParam.getOnlyAvailable());
-            if (searchParam.getOnlyAvailable() != null) {
+            if (searchParam.getOnlyAvailable() != null && searchParam.getOnlyAvailable()) {
                 Expression<Integer> limitExpr = root.get("participantLimit");
                 Expression<Integer> requestsExpr = root.get("confirmedRequests");
-                if (searchParam.getOnlyAvailable()) {
+                Predicate limitNotZero = cb.notEqual(limitExpr, 0);
+                if (limitNotZero != null) {
+                    predicateLogs.add("Поиск при participantLimit больше 0 и onlyAvailable с флагом: "
+                            + searchParam.getOnlyAvailable());
                     predicates.add(cb.lessThan(requestsExpr, limitExpr));
-                } else {
-                    predicates.add(cb.greaterThanOrEqualTo(requestsExpr, limitExpr));
                 }
             }
+
             log.info("Количество собранных предикатов {}", predicates.size());
-            log.info("Возвращаем лист с параметрами поиска");
+            log.info("Возвращаем лист с параметрами поиска: {}", predicateLogs);
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
