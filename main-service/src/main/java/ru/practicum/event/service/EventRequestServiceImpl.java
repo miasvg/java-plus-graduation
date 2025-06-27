@@ -57,14 +57,13 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     @Transactional
     public EventRequestDto cancelRequest(Long userId, Long requestId) {
-        EventRequest eventRequest = eventRequestRepository.findById(requestId).orElseThrow(() ->
-                new NotFoundException("EventRequest", requestId));
-        if (!eventRequest.getId().equals(requestId)) {
+        EventRequest eventRequest = eventRequestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("EventRequest", requestId));
+        if (!eventRequest.getRequester().getId().equals(userId)) {
             throw new NotValidUserException(userId);
         }
-        EventRequest oldEventReques = eventRequest;
-        //eventRequestRepository.delete(eventRequest);
         eventRequest.setStatus(Status.CANCELED);
-        return mapToEventRequestDto(oldEventReques);
+        EventRequest updatedRequest = eventRequestRepository.save(eventRequest);
+        return mapToEventRequestDto(updatedRequest);
     }
 }
