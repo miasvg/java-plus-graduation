@@ -16,5 +16,7 @@ public @interface ValidEventDate {
 
     Class<?>[] groups() default {};
 
+    boolean allowNull() default false;
+
     Class<? extends Payload>[] payload() default {};
 }

@@ -1,14 +1,13 @@
 package ru.practicum.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.location.dto.NewLocationRequest;
 
 import java.time.LocalDateTime;
@@ -25,6 +24,7 @@ public class UpdateEventRequest {
     String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime eventDate;
 
     NewLocationRequest location;
@@ -32,6 +32,7 @@ public class UpdateEventRequest {
     Integer participantLimit;
     Boolean requestModeration;
     String stateAction;
+
     @Size(min = 3, max = 120)
     String title;
 }

@@ -11,15 +11,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.StatClient;
 import ru.practicum.dto.RequestHitDto;
-import ru.practicum.event.dto.EventDtoPrivate;
+import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventSearchParam;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
-import ru.practicum.exeption.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -30,13 +28,8 @@ public class PublicEventController {
     private final StatClient statClient;
 
     @GetMapping("/{eventId}")
-    public EventDtoPrivate getById(@PathVariable Long eventId, HttpServletRequest request) {
-        log.info("Получаем мероприятие по id = {}", eventId);
-        Optional<EventDtoPrivate> event = eventService.getByIdPublic(eventId);
-        if (event.isEmpty()) {
-            log.error("Запрашиваемое мероприятие не найдено или еще не было опубликовано");
-            throw new NotFoundException("Event", eventId);
-        }
+    public EventFullDto getById(@PathVariable Long eventId, HttpServletRequest request) {
+        log.info("Получаем мероприятие для Public API по id = {}", eventId);
         RequestHitDto hitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
                 .ip(request.getRemoteAddr())
@@ -45,7 +38,7 @@ public class PublicEventController {
                 .build();
         log.info("Отправляем данные по запросу getById в сервис статистики {}", hitDto.toString());
         statClient.sendHit(hitDto);
-        return event.orElseThrow();
+        return eventService.getByIdPublic(eventId, request.getRemoteAddr());
     }
 
     @GetMapping
@@ -59,7 +52,8 @@ public class PublicEventController {
                                                   @RequestParam(defaultValue = "false")
                                                       Boolean onlyAvailable,
                                                   @RequestParam(required = false) String sort,
-                                                  @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+                                                  @RequestParam(defaultValue = "0", required = false)
+                                                      @PositiveOrZero Integer from,
                                                   @RequestParam(defaultValue = "10", required = false) @Positive Integer size,
                                                   HttpServletRequest request) {
         log.info("Получаем мероприятия с фильтрацией");
@@ -82,6 +76,6 @@ public class PublicEventController {
                 .build();
         log.info("Отправляем данные по запросу getEventsWithParam в сервис статистики {}", hitDto.toString());
         statClient.sendHit(hitDto);
-        return eventService.getEventsWithParamPublic(eventSearchParam, page);
+        return eventService.getEventsWithParamPublic(eventSearchParam, page, request.getRemoteAddr());
     }
 }

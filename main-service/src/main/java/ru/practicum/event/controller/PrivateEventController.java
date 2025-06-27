@@ -31,7 +31,7 @@ public class PrivateEventController {
 
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDtoPrivate addEvent(@PathVariable Long userId,
+    public EventFullDto addEvent(@PathVariable Long userId,
                                     @RequestBody @Valid NewEventRequest request) {
         log.info("Сохранение мероприятия");
         return eventService.addEvent(userId, request);
@@ -47,29 +47,40 @@ public class PrivateEventController {
 
     @GetMapping("/{userId}/events")
     public List<EventShortDto> getEventsByUser(@PathVariable("userId") long userId,
-                                               @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                               @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                               @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                               @RequestParam(required = false, defaultValue = "10") @Positive Integer size,
+                                               HttpServletRequest request) {
         Pageable page = PageRequest.of(from, size);
-        return eventService.getUsersEvents(userId, page);
-    }
-
-    @GetMapping("/users/{userId}/events/{eventId}")
-    public EventDtoPrivate getEventById(@PathVariable("userId") long userId,
-                                        @PathVariable("userId") long eventId,
-                                        HttpServletRequest request) {
         RequestHitDto hitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
                 .ip(request.getRemoteAddr())
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
                 .build();
-        log.info("Отправляем данные в сервис статистики {}", hitDto.toString());
+        log.info("Отправляем данные по запросу getEventsByUser в сервис статистики {}", hitDto.toString());
         statClient.sendHit(hitDto);
-        return eventService.getByIdPrivate(userId, eventId);
+        return eventService.getUsersEvents(userId, page, request.getRemoteAddr());
+    }
+
+    @GetMapping("/{userId}/events/{eventId}")
+    public EventFullDto getEventById(@PathVariable("userId") long userId,
+                                        @PathVariable("userId") long eventId,
+                                        HttpServletRequest request) {
+        log.info("Получение конкретной информации для конкретного пользователя о мероприятии");
+        RequestHitDto hitDto = RequestHitDto.builder()
+                .app("ewm-main-service")
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+        log.info("Отправляем данные по запросу getEventById в сервис статистики {}", hitDto.toString());
+        statClient.sendHit(hitDto);
+        return eventService.getByIdPrivate(userId, eventId, request.getRemoteAddr());
     }
 
     @GetMapping("/{userId}/requests")
-    public List<EventRequestDto> getUsersEventList(@PathVariable Long userId) {
+    public List<EventRequestDto> getUsersEventList(@PathVariable Long userId,
+                                                   HttpServletRequest request) {
         log.info("Получение запросов на учатие в событии пользователя с id {}", userId);
         return eventRequestService.getUsersRequests(userId);
     }
