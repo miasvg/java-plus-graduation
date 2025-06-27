@@ -1,16 +1,20 @@
 package ru.practicum.compilation.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class NewCompilationDto {
     List<Long> events;
-    Boolean pinned;
+    Boolean pinned = false;
+    @NotNull(message = "Необходимо указать заголовок")
     @NotBlank(message = "Необходимо указать заголовок")
     String title;
 }
