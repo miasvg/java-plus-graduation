@@ -72,17 +72,6 @@ public class ExceptionController {
                 .build();
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto eventNotFoundExceptionHandler(EventNotFoundException e){
-        return ExceptionDto.builder()
-                .status(HttpStatus.BAD_REQUEST.toString())
-                .reason("обытие не найдено")
-                .message(e.getMessage())
-                .timestamp(LocalDateTime.now().format(FORMATTER))
-                .build();
-    }
-
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler
     public ExceptionDto handleNotFound(final NotFoundException e) {
@@ -109,6 +98,16 @@ public class ExceptionController {
         return ExceptionDto.builder()
                 .status(HttpStatus.CONFLICT.toString())
                 .reason("for the requested operation the conditions are not met.")
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now().format(FORMATTER))
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionDto handleRequestModeration(final RequestModerationException e) {
+        return ExceptionDto.builder()
+                .status(HttpStatus.CONFLICT.toString())
+                .reason("it is not possible to submit a request for an event")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();

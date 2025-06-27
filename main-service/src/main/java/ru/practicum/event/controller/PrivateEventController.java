@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.StatClient;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.event.dto.*;
+import ru.practicum.event.model.EventRequest;
 import ru.practicum.event.service.EventRequestService;
 import ru.practicum.event.service.EventService;
 
@@ -21,22 +22,22 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
 public class PrivateEventController {
     private final EventService eventService;
     private final StatClient statClient;
     private final EventRequestService eventRequestService;
 
-    @PostMapping("/{userId}/events")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(@PathVariable Long userId,
-                                    @RequestBody @Valid NewEventRequest request) {
+                                 @RequestBody @Valid NewEventRequest request) {
         log.info("Сохранение мероприятия");
         return eventService.addEvent(userId, request);
     }
 
-    @PatchMapping("/{userId}/events/{eventId}")
+    @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable @Positive Long userId,
                                     @PathVariable @Positive Long eventId,
                                     @Valid @RequestBody UpdateEventRequest request) {
@@ -44,7 +45,7 @@ public class PrivateEventController {
         return eventService.updateEventByUser(userId, eventId, request);
     }
 
-    @GetMapping("/{userId}/events")
+    @GetMapping
     public List<EventShortDto> getEventsByUser(@PathVariable("userId") long userId,
                                                @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
                                                @RequestParam(required = false, defaultValue = "10") @Positive Integer size,
@@ -61,10 +62,10 @@ public class PrivateEventController {
         return eventService.getUsersEvents(userId, page, request.getRemoteAddr());
     }
 
-    @GetMapping("/{userId}/events/{eventId}")
+    @GetMapping("/{eventId}")
     public EventFullDto getEventById(@PathVariable("userId") long userId,
-                                        @PathVariable("userId") long eventId,
-                                        HttpServletRequest request) {
+                                     @PathVariable("userId") long eventId,
+                                     HttpServletRequest request) {
         log.info("Получение конкретной информации для конкретного пользователя о мероприятии");
         RequestHitDto hitDto = RequestHitDto.builder()
                 .app("ewm-main-service")
@@ -77,25 +78,10 @@ public class PrivateEventController {
         return eventService.getByIdPrivate(userId, eventId, request.getRemoteAddr());
     }
 
-    @GetMapping("/{userId}/requests")
-    public List<EventRequestDto> getUsersEventList(@PathVariable Long userId,
-                                                   HttpServletRequest request) {
-        log.info("Получение запросов на учатие в событии пользователя с id {}", userId);
-        return eventRequestService.getUsersRequests(userId);
-    }
-
-    @PostMapping("/{userId}/requests")
-    @ResponseStatus(HttpStatus.CREATED)
-    public EventRequestDto createUserRequestToEvent(@PathVariable Long userId,
-                                                    @RequestParam Long eventId) {
-        log.info("Создание запроса на участие события с id: {} пользователем id: {}", eventId, userId);
-        return eventRequestService.createRequest(userId, eventId);
-    }
-
-    @PatchMapping("/{userId}/requests/{requestId}/cancel")
-    public EventRequestDto cancelUserRequestToEvent(@PathVariable Long userId,
-                                                    @PathVariable Long requestId) {
-        log.info("Отмена запроса с id: {} пользователемс id: {}", requestId, userId);
-        return eventRequestService.cancelRequest(userId, requestId);
+    @GetMapping("/{eventId}/requests")
+    public List<EventRequestDto> getRequestByEvent(@PathVariable("userId") long userId,
+                                                   @PathVariable("eventId") long eventId) {
+        log.info("Получение информации о заявке на участие в Event id={} от пользователя id={}", eventId, userId);
+        return eventRequestService.getAllByEventId(userId, eventId);
     }
 }
