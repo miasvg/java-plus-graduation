@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.StatClient;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.event.dto.*;
-import ru.practicum.event.model.EventRequest;
 import ru.practicum.event.service.EventRequestService;
 import ru.practicum.event.service.EventService;
 
@@ -64,7 +63,7 @@ public class PrivateEventController {
 
     @GetMapping("/{eventId}")
     public EventFullDto getEventById(@PathVariable("userId") long userId,
-                                     @PathVariable("userId") long eventId,
+                                     @PathVariable("eventId") long eventId,
                                      HttpServletRequest request) {
         log.info("Получение конкретной информации для конкретного пользователя о мероприятии");
         RequestHitDto hitDto = RequestHitDto.builder()
