@@ -66,7 +66,7 @@ public class ExceptionController {
     public ExceptionDto notValidUserExceptionHandler(NotValidUserException e){
         return ExceptionDto.builder()
                 .status(HttpStatus.FORBIDDEN.toString())
-                .reason("Только  владлец заявки может ее отменять")
+                .reason("Только владлец заявки может ее отменять")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
@@ -105,9 +105,10 @@ public class ExceptionController {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     public ExceptionDto handleRequestModeration(final RequestModerationException e) {
+        log.error("Обрабатываем исключение RequestModerationException");
         return ExceptionDto.builder()
                 .status(HttpStatus.CONFLICT.toString())
-                .reason("it is not possible to submit a request for an event")
+                .reason("For the requested operation the conditions are not met.")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();

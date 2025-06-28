@@ -83,4 +83,13 @@ public class PrivateEventController {
         log.info("Получение информации о заявке на участие в Event id={} от пользователя id={}", eventId, userId);
         return eventRequestService.getAllByEventId(userId, eventId);
     }
+
+
+    @PatchMapping("/{eventId}/requests")
+    public EventRequestUpdateResult updateRequestStatus(@PathVariable Long userId,
+                                                        @PathVariable Long eventId,
+                                                        @RequestBody EventRequestUpdateDto request) {
+        log.info("Начинаем обработку запроса обновления {}", request);
+        return eventRequestService.updateRequestState(userId, eventId, request);
+    }
 }
