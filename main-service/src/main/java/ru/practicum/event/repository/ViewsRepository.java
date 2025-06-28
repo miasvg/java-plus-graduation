@@ -10,8 +10,13 @@ public interface ViewsRepository extends JpaRepository<Views, Long> {
 
     @Modifying
     @Query(value = "INSERT INTO views (event_id, ip) " +
-            "VALUES (:eventId, :ip) " +
-            "ON CONFLICT (ip) DO NOTHING",
+            "SELECT :eventId, :ip " +
+            "WHERE NOT EXISTS (" +
+            "   SELECT 1 " +
+            "   FROM views " +
+            "   WHERE event_id = :eventId " +
+            "   AND ip = :ip" +
+            ")",
             nativeQuery = true)
     void upsertNative(
             @Param("eventId") Long eventId,
