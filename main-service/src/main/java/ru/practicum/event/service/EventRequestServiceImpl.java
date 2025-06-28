@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.dto.EventRequestDto;
+import ru.practicum.event.dto.EventRequestUpdateDto;
+import ru.practicum.event.dto.EventRequestUpdateResult;
 import ru.practicum.event.mapper.EventRequestMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventRequest;
@@ -12,6 +14,7 @@ import ru.practicum.event.model.State;
 import ru.practicum.event.model.Status;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.EventRequestRepository;
+import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.exeption.NotValidUserException;
 import ru.practicum.exeption.RequestModerationException;
@@ -19,7 +22,9 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static ru.practicum.event.mapper.EventRequestMapper.mapToEventRequestDto;
 
@@ -45,8 +50,11 @@ public class EventRequestServiceImpl implements EventRequestService {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("EventRequest", userId));
         Event event = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("EventRequest", eventId));
-        EventRequest request = eventRequestRepository.findByEventIdAndRequesterId(eventId, userId)
-                .orElseThrow(() -> new RequestModerationException(eventId, "Заявка уже была отправлена"));
+        Optional<EventRequest> request = eventRequestRepository.findByEventIdAndRequesterId(eventId, userId);
+        if (request.isPresent()) {
+            throw new RequestModerationException(eventId, "Заявка уже была отправлена");
+        }
+
         if (event.getParticipantLimit() > 0 && event.getParticipantLimit() == event.getConfirmedRequests()) {
             log.error("Заявка не была добавлена: лимит заявок исчерпан: лимит={}, принятых заявок={}",
                     event.getParticipantLimit(), event.getConfirmedRequests());
@@ -57,36 +65,54 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new RequestModerationException(eventId, "Нельзя отправить заявку на собственное мероприятие");
         }
         if (!event.getState().equals(State.PUBLISHED)) {
-            log.error("Заявка не была отправлена: нельзя отправить заявка на неопубликованное мероприятие: {}",
+            log.error("Заявка не была отправлена: нельзя отправить заявку на неопубликованное мероприятие: {}",
                     event.getState());
             throw new RequestModerationException(eventId, "Нельзя отправить заявку на неопубликованное мероприятие");
         }
+
         EventRequest eventRequest = EventRequest.builder()
                 .created(LocalDateTime.now())
                 .requester(user)
                 .event(event)
                 .status(Status.PENDING)
                 .build();
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            log.info("Статус заявки автоматически изменен на CONFIRMED, модерация заявок Event: {}", event.getRequestModeration());
+        if (event.getParticipantLimit() == 0) {
+            log.info("Статус заявки автоматически изменен на CONFIRMED, лимит заявок для Event id={} не установлен",
+                    eventId);
             eventRequest.setStatus(Status.CONFIRMED);
+            updateConfirmedRequest(event, 1);
         }
+
+        if (!event.getRequestModeration()) {
+            log.info("Статус заявки автоматически изменен на CONFIRMED, модерация заявок для Event id={} не установлена",
+                    eventId);
+            eventRequest.setStatus(Status.CONFIRMED);
+            updateConfirmedRequest(event, 1);
+        }
+
         log.info("Заявка успешно сохранена: {}", eventRequest);
+        updateConfirmedRequest(event, 1);
         return mapToEventRequestDto(eventRequestRepository.save(eventRequest));
     }
 
     @Override
     @Transactional
     public EventRequestDto cancelRequest(Long userId, Long requestId) {
+        log.info("Отменяем заявку id={} пользователем id={}", requestId, userId);
         EventRequest eventRequest = eventRequestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("EventRequest", requestId));
         if (!eventRequest.getRequester().getId().equals(userId)) {
             throw new NotValidUserException(userId);
         }
-        EventRequest updateRequest = eventRequestRepository.updateStatus(requestId, Status.CANCELED);
-        return mapToEventRequestDto(updateRequest);
+        int i = eventRequestRepository.updateStatus(requestId, Status.CANCELED);
+        if (i == 1) {
+            log.info("Заявка отменена");
+            eventRequest.setStatus(Status.CANCELED);
+        }
+        return mapToEventRequestDto(eventRequest);
     }
 
+    @Transactional
     @Override
     public List<EventRequestDto> getAllByEventId(Long userId, Long eventId) {
         log.info("Поиск заявок на участие от пользователя id={} для Event id={}", userId, eventId);
@@ -96,5 +122,102 @@ public class EventRequestServiceImpl implements EventRequestService {
         return eventRequestRepository.findAllByEventId(eventId).stream()
                 .map(EventRequestMapper::mapToEventRequestDto)
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public EventRequestUpdateResult updateRequestState(Long userId, Long eventId,
+                                                       EventRequestUpdateDto updateDto) {
+        log.info("Начинаем обновление заявок для событий id={} пользователем id={}", eventId, userId);
+        EventRequestUpdateResult result = EventRequestUpdateResult.builder().build();
+        List<Long> idForConfirmed = new ArrayList<>();
+        List<Long> idForRejected = new ArrayList<>();
+        String stat = Status.valueOf(updateDto.getStatus()).toString();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User", userId));
+        log.info("Определен инициатор события {}", user);
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event", eventId));
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            log.error("Пользователь id={} не является инициатором события id={}", userId, eventId);
+            throw new ConflictException("У пользователя нет доступа к данному событию");
+        }
+
+        List<EventRequest> requests = eventRequestRepository.findByRequestIds(updateDto.getRequestIds());
+        if (requests.stream().anyMatch(eventRequest -> !eventRequest.getStatus().equals(Status.PENDING))) {
+            log.error("В списке есть заявка не находящаяся в статусе ожидания");
+            throw new RequestModerationException(eventId, "Можно принимать заявки только в статусе ожидания");
+        }
+
+        if (stat.equals("REJECTED")) {
+            List<Long> idRejected = requests.stream()
+                    .map(EventRequest::getId)
+                    .toList();
+            log.info("Обновляем статус для всех заявок с id={} на Status.REJECTED", idRejected);
+            int i = eventRequestRepository.updateStatusForRequestsIds(idRejected,
+                    Status.REJECTED);
+            log.info("Количество обновленных записей {}", i);
+            result.setRejectedRequests(eventRequestRepository.findByIdIn(idRejected)
+                    .stream()
+                    .map(EventRequestMapper::mapToEventRequestDto)
+                    .toList());
+            log.info("Возвращаем обновленный список заявок {}", result);
+            return result;
+        }
+
+        int limit = event.getParticipantLimit();
+        int confirmed = event.getConfirmedRequests();
+
+        log.info("Проверяем наличие свободных мест");
+        if (limit > 0 && limit <= confirmed) {
+            log.error("Лимит заявок для мероприятия id={} уже исчерпан {}", eventId, limit - confirmed);
+            throw new RequestModerationException(eventId, "Лимит заявок исчерпан");
+        }
+
+        int checkLimit = limit - confirmed;
+        log.info("Вычисляем количество свободных мест {}", checkLimit);
+
+        if (checkLimit > 0) {
+            if (requests.size() > checkLimit) {
+                idForConfirmed = requests.subList(0, checkLimit)
+                        .stream()
+                        .map(EventRequest::getId)
+                        .toList();
+                log.info("Обновляем статус для заявок с id={} на Status.CONFIRMED", idForConfirmed);
+                eventRequestRepository.updateStatusForRequestsIds(idForConfirmed,
+                        Status.CONFIRMED);
+                log.info("Обновляем возвращаемую сущность листом с заявками со статусом Status.CONFIRMED");
+
+                idForRejected = requests.subList(checkLimit, requests.size())
+                        .stream()
+                        .map(EventRequest::getId)
+                        .toList();
+                log.info("Обновляем статус для заявок с id={} на Status.REJECTED", idForRejected);
+                eventRequestRepository.updateStatusForRequestsIds(idForRejected,
+                        Status.REJECTED);
+            }
+        } else {
+            List<Long> idsRequests = requests.stream().map(EventRequest::getId).toList();
+            eventRequestRepository.updateStatusForRequestsIds(idsRequests,
+                    Status.CONFIRMED);
+        }
+        result.setConfirmedRequests(eventRequestRepository.findByIdIn(idForConfirmed)
+                .stream()
+                .map(EventRequestMapper::mapToEventRequestDto)
+                .toList());
+        updateConfirmedRequest(event, idForConfirmed.size());
+        if (!idForRejected.isEmpty()) {
+            result.setRejectedRequests(eventRequestRepository.findByIdIn(idForRejected)
+                    .stream()
+                    .map(EventRequestMapper::mapToEventRequestDto)
+                    .toList());
+        }
+        return result;
+    }
+
+    private void updateConfirmedRequest(Event event, int requests) {
+        eventRepository.updateConfirmedRequests(event.getId(), event.getConfirmedRequests() + requests);
     }
 }
