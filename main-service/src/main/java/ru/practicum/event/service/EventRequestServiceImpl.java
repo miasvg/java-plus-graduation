@@ -1,8 +1,11 @@
 package ru.practicum.event.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.dto.EventRequestDto;
 import ru.practicum.event.dto.EventRequestUpdateDto;
@@ -20,6 +23,7 @@ import ru.practicum.exeption.NotValidUserException;
 import ru.practicum.exeption.RequestModerationException;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
+import org.hibernate.annotations.QueryHints;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +39,9 @@ public class EventRequestServiceImpl implements EventRequestService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final EventRequestRepository eventRequestRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     public List<EventRequestDto> getUsersRequests(Long userId) {
@@ -124,7 +131,7 @@ public class EventRequestServiceImpl implements EventRequestService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public EventRequestUpdateResult updateRequestState(Long userId, Long eventId,
                                                        EventRequestUpdateDto updateDto) {
@@ -152,19 +159,10 @@ public class EventRequestServiceImpl implements EventRequestService {
         }
 
         if (stat.equals("REJECTED")) {
-            List<Long> idRejected = requests.stream()
+            idForRejected = requests.stream()
                     .map(EventRequest::getId)
                     .toList();
-            log.info("Обновляем статус для всех заявок с id={} на Status.REJECTED", idRejected);
-            int i = eventRequestRepository.updateStatusForRequestsIds(idRejected,
-                    Status.REJECTED);
-            log.info("Количество обновленных записей {}", i);
-            result.setRejectedRequests(eventRequestRepository.findByIdIn(idRejected)
-                    .stream()
-                    .map(EventRequestMapper::mapToEventRequestDto)
-                    .toList());
-            log.info("Возвращаем обновленный список заявок {}", result);
-            return result;
+            updateStatusAllRequest(idForRejected, Status.REJECTED);
         }
 
         int limit = event.getParticipantLimit();
@@ -185,36 +183,46 @@ public class EventRequestServiceImpl implements EventRequestService {
                         .stream()
                         .map(EventRequest::getId)
                         .toList();
-                log.info("Обновляем статус для заявок с id={} на Status.CONFIRMED", idForConfirmed);
-                eventRequestRepository.updateStatusForRequestsIds(idForConfirmed,
-                        Status.CONFIRMED);
-                log.info("Обновляем возвращаемую сущность листом с заявками со статусом Status.CONFIRMED");
+                updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
 
                 idForRejected = requests.subList(checkLimit, requests.size())
                         .stream()
                         .map(EventRequest::getId)
                         .toList();
-                log.info("Обновляем статус для заявок с id={} на Status.REJECTED", idForRejected);
-                eventRequestRepository.updateStatusForRequestsIds(idForRejected,
-                        Status.REJECTED);
+                updateStatusAllRequest(idForRejected, Status.REJECTED);
             }
         } else {
-            List<Long> idsRequests = requests.stream().map(EventRequest::getId).toList();
-            eventRequestRepository.updateStatusForRequestsIds(idsRequests,
-                    Status.CONFIRMED);
+            idForConfirmed = requests.stream().map(EventRequest::getId).toList();
+            updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
         }
-        result.setConfirmedRequests(eventRequestRepository.findByIdIn(idForConfirmed)
-                .stream()
-                .map(EventRequestMapper::mapToEventRequestDto)
-                .toList());
-        updateConfirmedRequest(event, idForConfirmed.size());
+
+        if (!idForConfirmed.isEmpty()) {
+            result.setConfirmedRequests(findAllByListIds(idForConfirmed));
+            updateConfirmedRequest(event, idForConfirmed.size());
+        }
         if (!idForRejected.isEmpty()) {
-            result.setRejectedRequests(eventRequestRepository.findByIdIn(idForRejected)
-                    .stream()
-                    .map(EventRequestMapper::mapToEventRequestDto)
-                    .toList());
+            result.setRejectedRequests(findAllByListIds(idForRejected));
         }
         return result;
+    }
+
+    @Transactional
+    private List<EventRequestDto> findAllByListIds(List<Long> ids) {
+        log.info("Получаем все обновленные заявки по id={}", ids);
+        entityManager.clear();
+        List<EventRequest> requests = eventRequestRepository.findByIdIn(ids);
+        log.info("Возвращаем список обновленных заявок {}", requests);
+        return requests.stream()
+                .map(EventRequestMapper::mapToEventRequestDto)
+                .toList();
+    }
+
+    @Transactional
+    private void updateStatusAllRequest(List<Long> ids, Status status) {
+        log.info("Обновляем статус для заявок id={} на {}", ids, status);
+        int update = eventRequestRepository.updateStatusForRequestsIds(ids, status);
+        entityManager.flush();
+        log.info("Количество обновленных записей: {}", update);
     }
 
     private void updateConfirmedRequest(Event event, int requests) {

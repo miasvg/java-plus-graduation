@@ -4,12 +4,9 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
+
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Data
 public class EventRequestUpdateResult {
     List<EventRequestDto> confirmedRequests;
     List<EventRequestDto> rejectedRequests;

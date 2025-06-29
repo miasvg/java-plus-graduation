@@ -29,14 +29,12 @@ public interface EventRequestRepository extends JpaRepository<EventRequest, Long
     List<EventRequest> findByRequestIds(@Param("requestIds") List<Long> requestIds);
 
     @Modifying
-    @Transactional
     @Query("UPDATE EventRequest e " +
             "SET e.status = :status " +
             "WHERE e.id IN (:requestIds)")
     int updateStatusForRequestsIds(@Param("requestIds") List<Long> requestIds,
                                                   @Param("status") Status status);
 
-    @Transactional
     @Query("SELECT e FROM EventRequest e WHERE e.id IN (:requestIds)")
     List<EventRequest> findByIdIn(@Param("requestIds") List<Long> requestIds);
 }
