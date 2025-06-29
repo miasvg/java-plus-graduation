@@ -136,6 +136,9 @@ public class EventRequestServiceImpl implements EventRequestService {
     public EventRequestUpdateResult updateRequestState(Long userId, Long eventId,
                                                        EventRequestUpdateDto updateDto) {
         log.info("Начинаем обновление заявок для событий id={} пользователем id={}", eventId, userId);
+        if (updateDto == null) {
+            throw new RequestModerationException(eventId, "Запрос на обновление событий отсутствует");
+        }
         EventRequestUpdateResult result = EventRequestUpdateResult.builder().build();
         List<Long> idForConfirmed = new ArrayList<>();
         List<Long> idForRejected = new ArrayList<>();
