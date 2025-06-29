@@ -1,6 +1,6 @@
 services:
   ewm-server:
-    container_name: ewm-server
+    container_name: ewm-service
     build: ./main-service
     image: ewm-server
     ports:
