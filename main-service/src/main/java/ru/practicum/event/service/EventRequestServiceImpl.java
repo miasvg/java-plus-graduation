@@ -23,7 +23,6 @@ import ru.practicum.exeption.NotValidUserException;
 import ru.practicum.exeption.RequestModerationException;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
-import org.hibernate.annotations.QueryHints;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

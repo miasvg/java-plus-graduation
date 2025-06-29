@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.EventRequest;
 import ru.practicum.event.model.Status;
 
@@ -20,7 +19,7 @@ public interface EventRequestRepository extends JpaRepository<EventRequest, Long
 
     @Modifying
     @Query("UPDATE EventRequest e SET e.status = :status WHERE e.id = :eventRequestId")
-    int updateStatus(@Param("eventRequestId") Long eventRequestId, @Param("status")Status status);
+    int updateStatus(@Param("eventRequestId") Long eventRequestId, @Param("status") Status status);
 
     List<EventRequest> findAllByEventId(Long eventId);
 
@@ -33,7 +32,7 @@ public interface EventRequestRepository extends JpaRepository<EventRequest, Long
             "SET e.status = :status " +
             "WHERE e.id IN (:requestIds)")
     int updateStatusForRequestsIds(@Param("requestIds") List<Long> requestIds,
-                                                  @Param("status") Status status);
+                                   @Param("status") Status status);
 
     @Query("SELECT e FROM EventRequest e WHERE e.id IN (:requestIds)")
     List<EventRequest> findByIdIn(@Param("requestIds") List<Long> requestIds);

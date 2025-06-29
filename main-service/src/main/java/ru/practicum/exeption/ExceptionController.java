@@ -29,7 +29,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto invalidRequestExceptionHandler (InvalidRequestException e) {
+    public ExceptionDto invalidRequestExceptionHandler(InvalidRequestException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .reason("request is invalid")
@@ -40,7 +40,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDto invalidDbRequestExceptionHandler (DataIntegrityViolationException e) {
+    public ExceptionDto invalidDbRequestExceptionHandler(DataIntegrityViolationException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .reason("request is invalid")
@@ -63,7 +63,7 @@ public class ExceptionController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ExceptionDto notValidUserExceptionHandler(NotValidUserException e){
+    public ExceptionDto notValidUserExceptionHandler(NotValidUserException e) {
         return ExceptionDto.builder()
                 .status(HttpStatus.FORBIDDEN.toString())
                 .reason("Только владлец заявки может ее отменять")

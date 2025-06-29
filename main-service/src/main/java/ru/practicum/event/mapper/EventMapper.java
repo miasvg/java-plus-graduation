@@ -59,6 +59,7 @@ public class EventMapper {
                 .confirmedRequests(event.getConfirmedRequests())
                 .build();
     }
+
     public static EventFullDto mapToFullDto(Event event) {
         return EventFullDto.builder()
                 .annotation(event.getAnnotation())

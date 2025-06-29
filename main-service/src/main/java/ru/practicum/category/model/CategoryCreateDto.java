@@ -2,6 +2,7 @@ package ru.practicum.category.model;
 
 //потом перенесем в отдельный модуль все дто
 // в спеке это NewCategoryDto
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;

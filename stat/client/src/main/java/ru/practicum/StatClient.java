@@ -25,8 +25,6 @@ public class StatClient {
                 .build();
     }
 
-
-
     public void sendHit(RequestHitDto hit) {
         log.info("Вызов записи хита в клиенте");
         try {

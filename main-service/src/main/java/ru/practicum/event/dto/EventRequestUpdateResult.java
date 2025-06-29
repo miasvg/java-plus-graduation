@@ -4,7 +4,6 @@ import lombok.*;
 
 import java.util.List;
 
-
 @Builder
 @Data
 public class EventRequestUpdateResult {
