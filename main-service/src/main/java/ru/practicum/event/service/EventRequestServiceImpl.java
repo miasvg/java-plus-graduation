@@ -86,6 +86,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             log.info("Статус заявки автоматически изменен на CONFIRMED, лимит заявок для Event id={} не установлен",
                     eventId);
             eventRequest.setStatus(Status.CONFIRMED);
+            log.info("___Подтверждение заявки на событие с id {}", eventRequest.getEvent().getId());
             updateConfirmedRequest(event, 1);
         }
 
@@ -93,12 +94,12 @@ public class EventRequestServiceImpl implements EventRequestService {
             log.info("Статус заявки автоматически изменен на CONFIRMED, модерация заявок для Event id={} не установлена",
                     eventId);
             eventRequest.setStatus(Status.CONFIRMED);
+            log.info("___Подтверждение заявки на событие с id {}", eventRequest.getEvent().getId());
             updateConfirmedRequest(event, 1);
         }
-
-        log.info("Заявка успешно сохранена: {}", eventRequest);
-        updateConfirmedRequest(event, 1);
-        return mapToEventRequestDto(eventRequestRepository.save(eventRequest));
+        EventRequest savedRequest = eventRequestRepository.save(eventRequest);
+        log.info("--------Заявка успешно сохранена: {}", savedRequest);
+        return mapToEventRequestDto(savedRequest);
     }
 
     @Override
