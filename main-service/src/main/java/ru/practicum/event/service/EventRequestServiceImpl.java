@@ -141,7 +141,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         EventRequestUpdateResult result = EventRequestUpdateResult.builder().build();
         List<Long> idForConfirmed = new ArrayList<>();
         List<Long> idForRejected = new ArrayList<>();
-        String stat = Status.valueOf(updateDto.getStatus()).toString();
+        String stat = updateDto.getStatus();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User", userId));
@@ -160,7 +160,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new RequestModerationException(eventId, "Можно принимать заявки только в статусе ожидания");
         }
 
-        if (stat.equals("REJECTED")) {
+        if (stat.equals("rejected")) {
             idForRejected = requests.stream()
                     .map(EventRequest::getId)
                     .toList();
@@ -179,20 +179,19 @@ public class EventRequestServiceImpl implements EventRequestService {
         int checkLimit = limit - confirmed;
         log.info("Вычисляем количество свободных мест {}", checkLimit);
 
-        if (checkLimit > 0) {
-            if (requests.size() > checkLimit) {
-                idForConfirmed = requests.subList(0, checkLimit)
-                        .stream()
-                        .map(EventRequest::getId)
-                        .toList();
-                updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
 
-                idForRejected = requests.subList(checkLimit, requests.size())
-                        .stream()
-                        .map(EventRequest::getId)
-                        .toList();
-                updateStatusAllRequest(idForRejected, Status.REJECTED);
-            }
+        if (requests.size() > checkLimit) {
+            idForConfirmed = requests.subList(0, checkLimit)
+                    .stream()
+                    .map(EventRequest::getId)
+                    .toList();
+            updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
+
+            idForRejected = requests.subList(checkLimit, requests.size())
+                    .stream()
+                    .map(EventRequest::getId)
+                    .toList();
+            updateStatusAllRequest(idForRejected, Status.REJECTED);
         } else {
             idForConfirmed = requests.stream().map(EventRequest::getId).toList();
             updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
