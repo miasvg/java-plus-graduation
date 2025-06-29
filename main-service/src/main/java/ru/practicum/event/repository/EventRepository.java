@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.event.model.Event;
-import ru.practicum.event.model.EventRequest;
 import ru.practicum.event.model.State;
 
 import java.util.List;
@@ -33,12 +32,12 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Modifying
     @Query("UPDATE Event e SET e.views = :views WHERE e.id = :eventId")
     void updateViews(@Param("eventId") Long eventId,
-                     @Param("views")  int  views);
+                     @Param("views") int views);
 
     @Modifying
     @Query("UPDATE Event e SET e.confirmedRequests = :confirmedRequests WHERE e.id = :eventId")
     void updateConfirmedRequests(@Param("eventId") Long eventId,
-                     @Param("confirmedRequests")  int  confirmedRequests);
+                                 @Param("confirmedRequests") int confirmedRequests);
 
     boolean existsByCategoryId(Long categoryId);
 }

@@ -50,10 +50,10 @@ public class PublicEventController {
                                                   @RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                                   @RequestParam(defaultValue = "false")
-                                                      Boolean onlyAvailable,
+                                                  Boolean onlyAvailable,
                                                   @RequestParam(required = false) String sort,
                                                   @RequestParam(defaultValue = "0", required = false)
-                                                      @PositiveOrZero Integer from,
+                                                  @PositiveOrZero Integer from,
                                                   @RequestParam(defaultValue = "10", required = false) @Positive Integer size,
                                                   HttpServletRequest request) {
         log.info("Получаем мероприятия с фильтрацией");
