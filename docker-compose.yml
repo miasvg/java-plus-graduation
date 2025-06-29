@@ -1,29 +1,31 @@
 services:
-  main-server:
+  ewm-server:
+    container_name: ewm-server
     build: ./main-service
-    image: main-server
+    image: ewm-server
     ports:
       - "8080:8080"
     depends_on:
-      - main-db
+      - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:5432/main_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm_db
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
 
-  main-db:
+  ewm-db:
+    container_name: ewm-db
     image: postgres:16.1
-    container_name: main-db
     ports:
       - "5433:5432"
     environment:
-      - POSTGRES_DB=main_db
+      - POSTGRES_DB=ewm_db
       - POSTGRES_USER=dbuser
       - POSTGRES_PASSWORD=12345
 
   stats-server:
+    container_name: stats-server
     build: ./stat/server
-    image: stat-server
+    image: stats-server
     ports:
       - "9090:9090"
     depends_on:
@@ -34,8 +36,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=12345
 
   stats-db:
-    image: postgres:16.1
     container_name: stats-db
+    image: postgres:16.1
     ports:
       - "5432:5432"
     environment:
