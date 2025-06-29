@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class EventRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,11 +4,8 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class EventRequestUpdateDto {
     List<Long> requestIds;
     String status;
