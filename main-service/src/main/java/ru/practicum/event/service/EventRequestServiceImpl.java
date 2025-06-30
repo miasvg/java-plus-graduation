@@ -25,7 +25,6 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,6 +85,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             log.info("Статус заявки автоматически изменен на CONFIRMED, лимит заявок для Event id={} не установлен",
                     eventId);
             eventRequest.setStatus(Status.CONFIRMED);
+            log.info("___Подтверждение заявки на событие с id {}", eventRequest.getEvent().getId());
             updateConfirmedRequest(event, 1);
         }
 
@@ -93,12 +93,12 @@ public class EventRequestServiceImpl implements EventRequestService {
             log.info("Статус заявки автоматически изменен на CONFIRMED, модерация заявок для Event id={} не установлена",
                     eventId);
             eventRequest.setStatus(Status.CONFIRMED);
+            log.info("___Подтверждение заявки на событие с id {}", eventRequest.getEvent().getId());
             updateConfirmedRequest(event, 1);
         }
-
-        log.info("Заявка успешно сохранена: {}", eventRequest);
-        updateConfirmedRequest(event, 1);
-        return mapToEventRequestDto(eventRequestRepository.save(eventRequest));
+        EventRequest savedRequest = eventRequestRepository.save(eventRequest);
+        log.info("--------Заявка успешно сохранена: {}", savedRequest);
+        return mapToEventRequestDto(savedRequest);
     }
 
     @Override
@@ -135,13 +135,11 @@ public class EventRequestServiceImpl implements EventRequestService {
     public EventRequestUpdateResult updateRequestState(Long userId, Long eventId,
                                                        EventRequestUpdateDto updateDto) {
         log.info("Начинаем обновление заявок для событий id={} пользователем id={}", eventId, userId);
-        if (updateDto == null) {
-            throw new RequestModerationException(eventId, "Запрос на обновление событий отсутствует");
-        }
+
         EventRequestUpdateResult result = EventRequestUpdateResult.builder().build();
-        List<Long> idForConfirmed = new ArrayList<>();
-        List<Long> idForRejected = new ArrayList<>();
-        String stat = Status.valueOf(updateDto.getStatus()).toString();
+
+        String status = updateDto.getStatus();
+        List<Long> requestIds = updateDto.getRequestIds();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User", userId));
@@ -154,17 +152,16 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new ConflictException("У пользователя нет доступа к данному событию");
         }
 
-        List<EventRequest> requests = eventRequestRepository.findByRequestIds(updateDto.getRequestIds());
+        List<EventRequest> requests = eventRequestRepository.findByRequestIds(requestIds);
         if (requests.stream().anyMatch(eventRequest -> !eventRequest.getStatus().equals(Status.PENDING))) {
             log.error("В списке есть заявка не находящаяся в статусе ожидания");
             throw new RequestModerationException(eventId, "Можно принимать заявки только в статусе ожидания");
         }
 
-        if (stat.equals("REJECTED")) {
-            idForRejected = requests.stream()
-                    .map(EventRequest::getId)
-                    .toList();
-            updateStatusAllRequest(idForRejected, Status.REJECTED);
+        if (status.equalsIgnoreCase("rejected")) {
+            updateStatusAllRequest(requestIds, Status.REJECTED);
+            result.setRejectedRequests(findAllByListIds(requestIds));
+            return result;
         }
 
         int limit = event.getParticipantLimit();
@@ -179,31 +176,24 @@ public class EventRequestServiceImpl implements EventRequestService {
         int checkLimit = limit - confirmed;
         log.info("Вычисляем количество свободных мест {}", checkLimit);
 
-        if (checkLimit > 0) {
-            if (requests.size() > checkLimit) {
-                idForConfirmed = requests.subList(0, checkLimit)
-                        .stream()
-                        .map(EventRequest::getId)
-                        .toList();
-                updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
+        List<Long> toConfirm;
+        List<Long> toReject = List.of();
 
-                idForRejected = requests.subList(checkLimit, requests.size())
-                        .stream()
-                        .map(EventRequest::getId)
-                        .toList();
-                updateStatusAllRequest(idForRejected, Status.REJECTED);
-            }
+        if (requests.size() > checkLimit) {
+            toConfirm = requestIds.subList(0, checkLimit);
+            toReject = requestIds.subList(checkLimit, requestIds.size());
         } else {
-            idForConfirmed = requests.stream().map(EventRequest::getId).toList();
-            updateStatusAllRequest(idForConfirmed, Status.CONFIRMED);
+            toConfirm = requestIds;
         }
 
-        if (!idForConfirmed.isEmpty()) {
-            result.setConfirmedRequests(findAllByListIds(idForConfirmed));
-            updateConfirmedRequest(event, idForConfirmed.size());
+        if (!toConfirm.isEmpty()) {
+            updateStatusAllRequest(toConfirm, Status.CONFIRMED);
+            result.setConfirmedRequests(findAllByListIds(toConfirm));
+            updateConfirmedRequest(event, toConfirm.size());
         }
-        if (!idForRejected.isEmpty()) {
-            result.setRejectedRequests(findAllByListIds(idForRejected));
+        if (!toReject.isEmpty()) {
+            updateStatusAllRequest(toReject, Status.REJECTED);
+            result.setRejectedRequests(findAllByListIds(toReject));
         }
         return result;
     }
