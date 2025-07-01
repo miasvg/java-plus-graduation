@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.event.model.Status;
+import ru.practicum.helper.RequestParamHelper;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,6 @@ public class EventRequestDto {
     private Long requester;
     private Status status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = RequestParamHelper.DATE_TIME_FORMAT)
     private LocalDateTime created;
 }
