@@ -43,7 +43,9 @@ public class EventRequestServiceImpl implements EventRequestService {
 
     @Override
     public List<EventRequestDto> getUsersRequests(Long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("EventRequest", userId));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User", userId);
+        }
         return eventRequestRepository.findAllByRequester_Id(userId).stream()
                 .map(EventRequestMapper::mapToEventRequestDto).toList();
     }
@@ -122,9 +124,12 @@ public class EventRequestServiceImpl implements EventRequestService {
     @Override
     public List<EventRequestDto> getAllByEventId(Long userId, Long eventId) {
         log.info("Поиск заявок на участие от пользователя id={} для Event id={}", userId, eventId);
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("EventRequest", userId));
-        eventRepository.findById(eventId).orElseThrow(() ->
-                new NotFoundException("EventRequest", eventId));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User", userId);
+        }
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("Event", userId);
+        }
         return eventRequestRepository.findAllByEventId(eventId).stream()
                 .map(EventRequestMapper::mapToEventRequestDto)
                 .toList();
