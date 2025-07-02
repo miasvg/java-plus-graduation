@@ -4,7 +4,7 @@ import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventRequest;
+import ru.practicum.eventRequest.dto.NewEventRequest;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.State;
 import ru.practicum.location.mapper.LocationMapper;

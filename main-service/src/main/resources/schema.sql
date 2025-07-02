@@ -75,5 +75,6 @@ CREATE TABLE IF NOT EXISTS comments(
     text VARCHAR(500),
     created TIMESTAMP,
     creator_id BIGINT REFERENCES users(id),
-    event_id BIGINT REFERENCES events(id)
+    event_id BIGINT REFERENCES events(id),
+    state VARCHAR
 );

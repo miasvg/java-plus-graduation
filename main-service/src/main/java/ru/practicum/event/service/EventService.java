@@ -2,6 +2,8 @@ package ru.practicum.event.service;
 
 import org.springframework.data.domain.Pageable;
 import ru.practicum.event.dto.*;
+import ru.practicum.eventRequest.dto.NewEventRequest;
+import ru.practicum.eventRequest.dto.UpdateEventRequest;
 
 import java.util.List;
 

@@ -11,10 +11,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.StatClient;
+import ru.practicum.comment.dto.CommentDto;
+import ru.practicum.comment.dto.NewCommentDto;
+import ru.practicum.comment.service.CommentService;
 import ru.practicum.dto.RequestHitDto;
 import ru.practicum.event.dto.*;
-import ru.practicum.event.service.EventRequestService;
+import ru.practicum.eventRequest.service.EventRequestService;
 import ru.practicum.event.service.EventService;
+import ru.practicum.eventRequest.dto.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +31,7 @@ public class PrivateEventController {
     private final EventService eventService;
     private final StatClient statClient;
     private final EventRequestService eventRequestService;
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -91,5 +96,49 @@ public class PrivateEventController {
                                                         @RequestBody EventRequestUpdateDto request) {
         log.info("___Начинаем обработку запроса обновления {}", request);
         return eventRequestService.updateRequestState(userId, eventId, request);
+    }
+
+    @GetMapping("/comments")
+    public List<CommentDto> getUserComments(@PathVariable Long userId) {
+        log.info("Получение всех комментариев пользователя id = {}", userId);
+        return commentService.getCommentsByUser(userId);
+    }
+
+    @GetMapping("/comments/{eventId}")
+    public List<CommentDto> getEventComments(@PathVariable Long userId,
+                                             @PathVariable Long eventId) {
+        log.info("Получение всех комментариев для мероприятия id = {}", eventId);
+        return commentService.getCommentsByEvent(eventId);
+    }
+
+    @GetMapping("/comments/{commentId}")
+    public CommentDto getById(@PathVariable Long userId,
+                              @PathVariable Long commentId) {
+        log.info("Получение комментария по id={}", commentId);
+        return commentService.getById(commentId);
+    }
+
+    @PostMapping("/comments/{eventId}")
+    public CommentDto addComment(@PathVariable Long userId,
+                                 @PathVariable Long eventId,
+                                 @Valid @RequestBody NewCommentDto dto) {
+        log.info("Добавление комментария пользователем id={} для мероприятия id={}", userId, eventId);
+        return commentService.createComment(userId, eventId, dto);
+    }
+
+    @PatchMapping("/comments/{commentId}")
+    public CommentDto editComment(@PathVariable Long userId,
+                                  @PathVariable Long commentId,
+                                  @Valid @RequestBody NewCommentDto dto) {
+        log.info("Обновление комментария id={} пользователем id={}", commentId, userId);
+        return commentService.updateComment(userId, commentId, dto);
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PathVariable Long userId,
+                              @PathVariable Long commentId) {
+        log.info("Удаление комментария id={} пользователем id={}", commentId, userId);
+        commentService.deleteComment(userId, commentId);
     }
 }

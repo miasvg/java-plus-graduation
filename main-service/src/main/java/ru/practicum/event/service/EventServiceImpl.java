@@ -19,6 +19,8 @@ import ru.practicum.event.model.State;
 import ru.practicum.event.model.StateAction;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.event.repository.ViewsRepository;
+import ru.practicum.eventRequest.dto.NewEventRequest;
+import ru.practicum.eventRequest.dto.UpdateEventRequest;
 import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.InvalidRequestException;
 import ru.practicum.exeption.NotFoundException;
