@@ -25,7 +25,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Optional<Comment> findByIdAndState(Long id, State state);
 
     @Modifying
-    @Query("UPDATE Comment c SET e.text = :text WHERE c.id = :id")
+    @Query("UPDATE Comment c SET c.text = :text WHERE c.id = :id")
     int updateCommentText(@Param("text") String text,
                           @Param("id") Long id);
 

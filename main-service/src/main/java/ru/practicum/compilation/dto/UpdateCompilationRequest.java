@@ -2,11 +2,11 @@ package ru.practicum.compilation.dto;
 
 import lombok.Data;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class UpdateCompilationRequest {
-    List<Long> events;
+    Set<Long> events;
     Boolean pinned;
     String title;
 }
