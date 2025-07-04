@@ -12,8 +12,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LocationDto {
-    Float lat;
-    Float lon;
+    Double lat;
+    Double lon;
 
     @Override
     public boolean equals(Object o) {

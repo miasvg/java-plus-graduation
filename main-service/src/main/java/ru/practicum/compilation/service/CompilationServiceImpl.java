@@ -49,7 +49,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto create(NewCompilationDto dto) {
         Compilation newCompilation = CompilationMapper.mapToCompilation(dto);
-        newCompilation.setEvents(getEventsByIds(dto.getEvents()));
+        newCompilation.setEvents(getEventsByIds(dto.getEvents().stream().toList()));
 
         return CompilationMapper.mapToDto(compilationRepository.save(newCompilation));
     }
@@ -99,7 +99,7 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setPinned(request.getPinned());
         }
         if (request.getEvents() != null) {
-            compilation.setEvents(getEventsByIds(request.getEvents()));
+            compilation.setEvents(getEventsByIds(request.getEvents().stream().toList()));
         }
     }
 }

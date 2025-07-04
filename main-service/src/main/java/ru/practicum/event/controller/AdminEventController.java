@@ -38,9 +38,9 @@ public class AdminEventController {
             @RequestParam(required = false) List<String> states,
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @DateTimeFormat(pattern = RequestParamHelper.DATE_TIME_FORMAT) LocalDateTime rangeStart,
             @RequestParam(required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @DateTimeFormat(pattern = RequestParamHelper.DATE_TIME_FORMAT) LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         Pageable page = PageRequest.of(from, size);
