@@ -7,6 +7,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.helper.RequestParamHelper;
 import ru.practicum.location.dto.NewLocationRequest;
 import ru.practicum.validator.ValidEventDate;
 
@@ -36,7 +37,7 @@ public class NewEventRequest {
 
     @NotNull
     @ValidEventDate
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = RequestParamHelper.DATE_TIME_FORMAT)
     LocalDateTime eventDate;
 
     @NotNull

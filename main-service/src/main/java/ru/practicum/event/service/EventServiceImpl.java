@@ -123,7 +123,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public List<EventShortDto> getUsersEvents(Long userId, Pageable page, String ip) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User", userId));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User", userId);
+        }
         Page<Event> events = eventRepository.findByInitiatorId(userId, page);
         events.forEach(event -> updateViews(event.getId(), ip));
         log.info("Получаем все опубликованные мероприятия для пользователя id = {}: размер списка: {}, " +
