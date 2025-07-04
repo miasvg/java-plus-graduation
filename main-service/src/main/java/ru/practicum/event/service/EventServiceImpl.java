@@ -129,7 +129,6 @@ public class EventServiceImpl implements EventService {
         log.info("Получаем все опубликованные мероприятия для пользователя id = {}: размер списка: {}, " +
                 "список меропритий: {}", userId, events.getSize(), events.getContent());
         return events.stream()
-                .sequential()
                 .map(EventMapper::mapToShortDto)
                 .toList();
     }
