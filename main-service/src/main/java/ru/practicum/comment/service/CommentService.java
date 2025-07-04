@@ -22,8 +22,6 @@ public interface CommentService {
 
     void deleteCommentByAdmin(Long commentId);
 
-    CommentDto getById(Long commentId);
-
     List<CommentDto> updateCommentState(CommentUpdateRequestDto request);
 
     List<CommentDto> getCommentWithParamAdmin(CommentSearchParam commentSearchParam, Pageable page);

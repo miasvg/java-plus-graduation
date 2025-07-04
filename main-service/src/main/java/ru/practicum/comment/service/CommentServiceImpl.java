@@ -151,15 +151,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDto getById(Long commentId) {
-        log.info("Начинаем получени комментария по id={}", commentId);
-        Comment comment = commentRepo.findByIdAndState(commentId, State.PUBLISHED)
-                .orElseThrow(() -> new NotFoundException("Комментарий", commentId));
-        log.info("Получение комментария прошло успешно: {}", comment);
-        return CommentMapper.toDto(comment);
-    }
-
-    @Override
     public List<CommentDto> getCommentWithParamAdmin(CommentSearchParam commentSearchParam, Pageable page) {
         log.info("Начинаем получение комментариев с фильтрацией для Админ API");
         Specification<Comment> spec = createSpecificationComment(commentSearchParam);
