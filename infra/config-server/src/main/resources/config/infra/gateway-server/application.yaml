@@ -70,7 +70,7 @@ spring:
         - id: user
           uri: lb://main-service
           predicates:
-            - Path=/admin/users/**
+            - Path=/admin/users, /admin/users/**
 
 
 
