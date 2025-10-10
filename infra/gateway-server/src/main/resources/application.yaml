@@ -11,7 +11,7 @@ spring:
         useRandomPolicy: true
       discovery:
         enabled: true
-        serviceId: config-server
+        service-id: config-server
 
 eureka:
   client:
