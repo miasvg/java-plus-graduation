@@ -1,6 +1,6 @@
 services:
 
-  ewm-db:
+  event-db:
     container_name: ewm-db
     image: postgres:16.1
     restart: always
@@ -10,7 +10,38 @@ services:
       - POSTGRES_DB=ewm_db
       - POSTGRES_USER=dbuser
       - POSTGRES_PASSWORD=12345
+  request-db:
+    container_name: request-db
+    image: postgres:16.1
+    restart: always
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_DB=request_db
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=12345
 
+  comment-db:
+    container_name: comment-db
+    image: postgres:16.1
+    restart: always
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_DB=comment_db
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=12345
+
+  user-db:
+    container_name: user-db
+    image: postgres:16.1
+    restart: always
+    ports:
+      - "5437:5432"
+    environment:
+      - POSTGRES_DB=user_db
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=12345
   stats-db:
     container_name: stats-db
     image: postgres:16.1
