@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5435/maindb
+    url: jdbc:postgresql://localhost:5433/ewm_db
     username: dbuser
     password: 12345
   jpa:
@@ -13,6 +13,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
 
 logging:
   level:

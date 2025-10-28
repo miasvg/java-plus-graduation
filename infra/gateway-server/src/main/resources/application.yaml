@@ -10,7 +10,7 @@ spring:
         useRandomPolicy: true
       discovery:
         enabled: true
-        serviceId: config-server
+        service-id: config-server
 
 eureka:
   client:
@@ -22,5 +22,4 @@ eureka:
     instance-id: "${spring.application.name}:${random.value}"
     leaseRenewalIntervalInSeconds: 10
 
-server:
-  port: 8080
+

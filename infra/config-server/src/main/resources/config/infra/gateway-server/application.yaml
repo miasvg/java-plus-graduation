@@ -2,11 +2,14 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: gateway-server
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
+          lower-case-service-id: true
       routes:
 
         - id: admin_category
@@ -67,4 +70,15 @@ spring:
         - id: user
           uri: lb://main-service
           predicates:
-            - Path=/admin/users/**
+            - Path=/admin/users, /admin/users/**
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
