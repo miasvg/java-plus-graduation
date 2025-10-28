@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.helper.RequestParamHelper;
-import ru.practicum.location.dto.NewLocationRequest;
 
 import java.time.LocalDateTime;
 
