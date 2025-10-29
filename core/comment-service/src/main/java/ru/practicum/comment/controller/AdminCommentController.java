@@ -28,13 +28,13 @@ public class AdminCommentController {
     private final CommentService commentService;
 
     @GetMapping()
-    public List<CommentDto> getComments(@RequestParam List<String> state,
-                                        @RequestParam
+    public List<CommentDto> getComments(@RequestParam(required = false) List<String> state,
+                                        @RequestParam(required = false)
                                         @DateTimeFormat(pattern = RequestParamHelper.DATE_TIME_FORMAT) LocalDateTime rangeStart,
-                                        @RequestParam
+                                        @RequestParam(required = false)
                                         @DateTimeFormat(pattern = RequestParamHelper.DATE_TIME_FORMAT) LocalDateTime rangeEnd,
-                                        @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                        @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                        @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+                                        @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         Pageable page = PageRequest.of(from, size);
         log.info("Получаем комментарии в Админ API с фильтрацией");
         CommentSearchParam commentSearchParam = CommentSearchParam.builder()

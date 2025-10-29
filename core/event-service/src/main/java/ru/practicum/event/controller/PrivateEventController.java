@@ -43,8 +43,8 @@ public class PrivateEventController {
 
     @GetMapping
     public List<EventShortDto> getEventsByUser(@PathVariable("userId") long userId,
-                                               @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
-                                               @RequestParam(defaultValue = "10", required = false) @Positive Integer size,
+                                               @RequestParam(required = false, defaultValue = "0") @PositiveOrZero Integer from,
+                                               @RequestParam(required = false, defaultValue = "10") @Positive Integer size,
                                                HttpServletRequest request) {
         Pageable page = PageRequest.of(from, size);
         RequestHitDto hitDto = RequestHitDto.builder()
