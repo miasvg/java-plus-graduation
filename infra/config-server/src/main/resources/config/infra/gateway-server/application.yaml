@@ -3,76 +3,65 @@ server:
 
 spring:
   application:
-    name: gateway-server
+    name: api-gateway
+
   cloud:
     gateway:
       discovery:
         locator:
-          enabled: true
-          lower-case-service-id: true
+          enabled: true  # ✅ Автоматическое определение сервисов из Eureka
+
       routes:
-
-        - id: admin_category
-          uri: lb://main-service
+        # === USER SERVICE ===
+        - id: user-service-admin
+          uri: lb://user-service
           predicates:
-            - Path=/admin/categories/**
+            - Path=/admin/users/**
 
-        - id: public_category
-          uri: lb://main-service
+        # === REQUEST SERVICE ===
+        - id: request-service
+          uri: lb://request-service
           predicates:
-            - Path=/categories/**
-
-        - id: admin_comment
-          uri: lb://main-service
+            - Path=/users/{userId}/requests/**
+        - id: request-service
+          uri: lb://request-service
+          predicates:
+            - Path=/users/{userId}/events/{eventId}/requests
+        # === COMMENT SERVICE ===
+        - id: comment-service-admin
+          uri: lb://comment-service
           predicates:
             - Path=/admin/comments/**
-
-        - id: private_comment
-          uri: lb://main-service
+        - id: comment-service-user
+          uri: lb://comment-service
           predicates:
             - Path=/users/{userId}/comments/**
-
-        - id: public_comment
-          uri: lb://main-service
+        - id: comment-service-public
+          uri: lb://comment-service
           predicates:
             - Path=/comments/**
 
-        - id: admin_compilation
-          uri: lb://main-service
-          predicates:
-            - Path=/admin/compilations/**
-
-        - id: public_compilation
-          uri: lb://main-service
-          predicates:
-            - Path=/compilations/**
-
-        - id: admin_event
-          uri: lb://main-service
+        # === EVENT SERVICE ===
+        - id: event-service-admin
+          uri: lb://event-service
           predicates:
             - Path=/admin/events/**
-
-        - id: private_event
-          uri: lb://main-service
+        - id: event-service-private
+          uri: lb://event-service
           predicates:
             - Path=/users/{userId}/events/**
-
-        - id: public_event
-          uri: lb://main-service
+        - id: event-service-public
+          uri: lb://event-service
           predicates:
-            - Path=/events/**
-
-        - id: participation_request
-          uri: lb://main-service
+            - Path=/events/**, /categories/**, /compilations/**
+        - id: categories-admin-service
+          uri: lb://event-service
           predicates:
-            - Path=/users/{userId}/requests/**
-
-        - id: user
-          uri: lb://main-service
+            - Path=/admin/categories/**
+        - id: compilation-admin-service
+          uri: lb://event-service
           predicates:
-            - Path=/admin/users, /admin/users/**
-
-
+            - Path=/admin/compilations/**
 
 management:
   endpoints:
