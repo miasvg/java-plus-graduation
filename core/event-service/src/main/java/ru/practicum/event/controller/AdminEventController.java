@@ -23,15 +23,15 @@ public class AdminEventController {
 
     @GetMapping
     public List<EventShortDto> getEvents(
-            @RequestParam(required = false) List<Long> users,
-            @RequestParam(required = false) List<String> states,
-            @RequestParam(required = false) List<Long> categories,
-            @RequestParam(required = false)
+            @RequestParam List<Long> users,
+            @RequestParam List<String> states,
+            @RequestParam List<Long> categories,
+            @RequestParam
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam(required = false)
+            @RequestParam
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-            @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = "10") @Positive Integer size) {
         Pageable page = PageRequest.of(from, size);
         log.info("Получаем события в Админ API с фильтрацией");
         EventSearchParam eventSearchParam = EventSearchParam.builder()
