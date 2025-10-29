@@ -26,12 +26,12 @@ public class AdminEventController {
             @RequestParam List<Long> users,
             @RequestParam List<String> states,
             @RequestParam List<Long> categories,
-            @RequestParam
+            @RequestParam(required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-            @RequestParam
+            @RequestParam(required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-            @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size) {
+            @RequestParam(defaultValue = "0", required = false) @PositiveOrZero Integer from,
+            @RequestParam(defaultValue = "10", required = false) @Positive Integer size) {
         Pageable page = PageRequest.of(from, size);
         log.info("Получаем события в Админ API с фильтрацией");
         EventSearchParam eventSearchParam = EventSearchParam.builder()

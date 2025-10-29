@@ -45,15 +45,15 @@ public class PublicEventController {
 
     @GetMapping
     public List<EventShortDto> getEventsWithParam(@RequestParam(required = false) String text,
-                                                  @RequestParam List<Long> categories,
-                                                  @RequestParam Boolean paid,
-                                                  @RequestParam
+                                                  @RequestParam(required = false) List<Long> categories,
+                                                  @RequestParam(required = false) Boolean paid,
+                                                  @RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
-                                                  @RequestParam
+                                                  @RequestParam(required = false)
                                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                                   @RequestParam(defaultValue = "false")
                                                   Boolean onlyAvailable,
-                                                  @RequestParam String sort,
+                                                  @RequestParam(required = false) String sort,
                                                   @RequestParam(defaultValue = "0", required = false)
                                                   @PositiveOrZero Integer from,
                                                   @RequestParam(defaultValue = "10", required = false) @Positive Integer size,

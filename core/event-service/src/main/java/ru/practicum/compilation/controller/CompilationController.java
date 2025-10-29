@@ -19,7 +19,7 @@ public class CompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public List<CompilationDto> getAllCompilations(@RequestParam Boolean pinned,
+    public List<CompilationDto> getAllCompilations(@RequestParam(required = false) Boolean pinned,
                                                    @RequestParam(defaultValue = "0") @Min(0) int from,
                                                    @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
