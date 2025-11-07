@@ -24,7 +24,7 @@ public class EventShortDto {
     LocalDateTime eventDate;
 
     UserShortDto initiator;
-    int views;
+    double rating;
     int confirmedRequests;
     String description;
     int participantLimit;

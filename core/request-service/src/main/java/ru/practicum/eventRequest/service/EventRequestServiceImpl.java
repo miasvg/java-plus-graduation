@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.UserActionClient;
 import ru.practicum.dto.*;
 import ru.practicum.enums.State;
 import ru.practicum.eventRequest.mapper.EventRequestMapper;
@@ -18,6 +19,9 @@ import ru.practicum.eventRequest.repository.EventRequestRepository;
 import ru.practicum.exeption.*;
 import ru.practicum.feign.FeignEventClient;
 import ru.practicum.feign.FeignUserClient;
+import stats.messages.collector.UserAction;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +34,7 @@ public class EventRequestServiceImpl implements EventRequestService {
     private final FeignUserClient userClient;
     private final FeignEventClient eventClient;
     private final EventRequestRepository eventRequestRepository;
+    private final UserActionClient userActionClient;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -53,7 +58,7 @@ public class EventRequestServiceImpl implements EventRequestService {
             throw new RequestModerationException(eventId, "Заявка уже была отправлена");
         }
 
-        if (event.getParticipantLimit() > 0 && event.getParticipantLimit().equals(event.getConfirmedRequests())) {
+        if (event.getParticipantLimit() > 0 && event.getParticipantLimit() == event.getConfirmedRequests()) {
             log.error("Заявка не была добавлена: лимит заявок исчерпан: лимит={}, принятых заявок={}",
                     event.getParticipantLimit(), event.getConfirmedRequests());
             throw new RequestModerationException(eventId, "Лимит заявок исчерпан");
@@ -91,6 +96,7 @@ public class EventRequestServiceImpl implements EventRequestService {
         }
         EventRequest savedRequest = eventRequestRepository.save(eventRequest);
         log.info("--------Заявка успешно сохранена: {}", savedRequest);
+        userActionClient.collectUserAction(eventId, userId, UserAction.ActionTypeProto.ACTION_REGISTER, Instant.now());
         return mapToEventRequestDto(savedRequest);
     }
 
