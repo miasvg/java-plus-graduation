@@ -13,7 +13,6 @@ import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventSearchParam;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
-import ru.practicum.helper.RequestParamHelper;
 import stats.messages.collector.UserAction;
 
 import java.time.LocalDateTime;
@@ -26,10 +25,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PublicEventController {
     private final EventService eventService;
+    private static final String EWM_ID = "X-EWM-USER-ID";
 
     @GetMapping("/{eventId}")
     public EventFullDto getById(@PathVariable Long eventId, HttpServletRequest request,
-                                @RequestHeader("X-EWM-USER-ID") Long userId) {
+                                @RequestHeader(EWM_ID) Long userId) {
         log.info("Получаем мероприятие для Public API по id = {}", eventId);
 
         log.info("Отправляем данные по запросу getById в сервис статистики userId {},eventId {}, action {}",
@@ -85,12 +85,12 @@ public class PublicEventController {
     }
 
     @GetMapping("/recommendations")
-    public List<EventFullDto> getRecommendationEvent(@RequestHeader("X-EWM-USER-ID") Long userId) {
+    public List<EventFullDto> getRecommendationEvent(@RequestHeader(EWM_ID) Long userId) {
         return eventService.getRecommendations(userId);
     }
 
     @PutMapping("/{eventId}/like")
-    public void setLike(@RequestHeader("X-EWM-USER-ID") Long userId, @PathVariable Long eventId) {
+    public void setLike(@RequestHeader(EWM_ID) Long userId, @PathVariable Long eventId) {
         eventService.setLike(userId, eventId);
     }
 }

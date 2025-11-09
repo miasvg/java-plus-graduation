@@ -35,6 +35,7 @@ public class UserActionHandlerImpl implements UserActionHandler {
             if (existing.getMark() < newMark) {
                 existing.setMark(newMark);
                 existing.setTimestamp(action.getTimestamp());
+                userActionRepository.save(existing);
                 log.debug("Обновлено действие пользователя {}", existing);
             }
         }

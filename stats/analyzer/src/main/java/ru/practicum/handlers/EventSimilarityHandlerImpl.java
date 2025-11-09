@@ -29,6 +29,7 @@ public class EventSimilarityHandlerImpl implements EventSimilarityHandler {
             EventSimilarity existing = repository.findByEventAAndEventB(eventA, eventB);
             existing.setScore(avro.getScore());
             existing.setTimestamp(avro.getTimestamp());
+            repository.save(existing);
             log.debug("Обновлена схожесть событий {}", existing);
         }
     }
