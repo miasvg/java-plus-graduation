@@ -41,9 +41,10 @@ public class EventRequestController {
     }
 
     @GetMapping("/requests/{requestId}/feign")
-    public Optional<EventRequestDto> getByEventIdAndRequesterId(@PathVariable Long eventId, @PathVariable Long userId){
+    public Optional<EventRequestDto> getByEventIdAndRequesterId(@PathVariable Long eventId, @PathVariable Long userId) {
         return eventRequestService.getByEventIdAndRequesterId(eventId, userId);
     }
+
 
     @GetMapping("events/{eventId}/requests")
     public List<EventRequestDto> getRequestByEvent(@PathVariable("userId") long userId,
@@ -51,7 +52,6 @@ public class EventRequestController {
         log.info("Получение информации о заявке на участие в Event id={} от пользователя id={}", eventId, userId);
         return eventRequestService.getAllByEventId(userId, eventId);
     }
-
 
 
     @PatchMapping("events/{eventId}/requests")

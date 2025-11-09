@@ -24,6 +24,18 @@ logging:
     org.springframework.transaction: INFO
     org.springframework.transaction.interceptor: TRACE
     org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+    net.devh.boot.grpc.client: DEBUG
 
-stat:
-  server-id: stats-server
+grpc:
+  client:
+    ANALYZER:
+      address: 'discovery:///ANALYZER'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+    COLLECTOR:
+      address: 'discovery:///COLLECTOR'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+

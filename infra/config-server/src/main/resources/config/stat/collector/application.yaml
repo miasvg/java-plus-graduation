@@ -1,0 +1,9 @@
+grpc:
+  server:
+    port: 0
+    security:
+      enabled: false
+
+kafka:
+  bootstrap-servers: localhost:9092
+  value-serializer: ru.practicum.serializer.AvroSerializer

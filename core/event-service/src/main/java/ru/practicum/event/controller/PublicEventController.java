@@ -9,13 +9,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.StatClient;
-import ru.practicum.dto.RequestHitDto;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventSearchParam;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.event.service.EventService;
-import ru.practicum.helper.RequestParamHelper;
+import stats.messages.collector.UserAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,20 +25,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PublicEventController {
     private final EventService eventService;
-    private final StatClient statClient;
+    private static final String EWM_ID = "X-EWM-USER-ID";
 
     @GetMapping("/{eventId}")
-    public EventFullDto getById(@PathVariable Long eventId, HttpServletRequest request) {
+    public EventFullDto getById(@PathVariable Long eventId, HttpServletRequest request,
+                                @RequestHeader(EWM_ID) Long userId) {
         log.info("Получаем мероприятие для Public API по id = {}", eventId);
-        RequestHitDto hitDto = RequestHitDto.builder()
-                .app("ewm-main-service")
-                .ip(request.getRemoteAddr())
-                .uri(request.getRequestURI())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.info("Отправляем данные по запросу getById в сервис статистики {}", hitDto.toString());
-        statClient.sendHit(hitDto);
-        return eventService.getByIdPublic(eventId, request.getRemoteAddr());
+
+        log.info("Отправляем данные по запросу getById в сервис статистики userId {},eventId {}, action {}",
+                userId, eventId, UserAction.ActionTypeProto.ACTION_VIEW);
+
+        return eventService.getByIdPublic(eventId, request.getRemoteAddr(), userId);
     }
 
     @GetMapping
@@ -70,30 +65,32 @@ public class PublicEventController {
                 .onlyAvailable(onlyAvailable)
                 .sort(sort)
                 .build();
-        RequestHitDto hitDto = RequestHitDto.builder()
-                .app("ewm-main-service")
-                .ip(request.getRemoteAddr())
-                .uri(request.getRequestURI())
-                .timestamp(LocalDateTime.now())
-                .build();
-        log.info("Отправляем данные по запросу getEventsWithParam в сервис статистики {}", hitDto.toString());
-        statClient.sendHit(hitDto);
         return eventService.getEventsWithParamPublic(eventSearchParam, page, request.getRemoteAddr());
     }
 
     @GetMapping("/{eventId}/feign")
-    public Optional<EventFullDto> getEventById(@PathVariable Long eventId){
+    public Optional<EventFullDto> getEventById(@PathVariable Long eventId) {
         return eventService.getEventByIdFeign(eventId);
     }
 
     @GetMapping("/{eventId}/{userId}/feign")
     public Optional<EventFullDto> getEventByIdAndInitiator(@PathVariable Long eventId,
-                                                           @PathVariable Long userId){
+                                                           @PathVariable Long userId) {
         return eventService.getEventByIdAndInitiator(eventId, userId);
     }
 
     @PutMapping("/{eventId}/{increment}/feign")
-    public Boolean updateConfirmedRequests(@PathVariable Long eventId, @PathVariable Integer increment){
+    public Boolean updateConfirmedRequests(@PathVariable Long eventId, @PathVariable Integer increment) {
         return eventService.updateConfirmedRequests(eventId, increment);
+    }
+
+    @GetMapping("/recommendations")
+    public List<EventFullDto> getRecommendationEvent(@RequestHeader(EWM_ID) Long userId) {
+        return eventService.getRecommendations(userId);
+    }
+
+    @PutMapping("/{eventId}/like")
+    public void setLike(@RequestHeader(EWM_ID) Long userId, @PathVariable Long eventId) {
+        eventService.setLike(userId, eventId);
     }
 }

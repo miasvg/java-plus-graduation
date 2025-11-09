@@ -17,3 +17,11 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+
+grpc:
+  client:
+    COLLECTOR:
+      address: 'discovery:///COLLECTOR'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
